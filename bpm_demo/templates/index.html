@@ -1,0 +1,65 @@
+{% extends '_layout/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+<div class="alert alert-primary">
+   Here are your Tasks : 
+</div>
+       <div class="container col-md-8 centered d-flex">
+            <table class="table table-light table-sm table-bordered table-hover col-md-12">
+                <thead>
+                    <tr>
+                        <th scope="col">TaskId</th>
+                        <th scope="col">assignee</th>
+                        <th scope="col">view task</th>
+                        <th scope="col">state</th>
+                        <th scope="col">By</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in inbox %}
+                    <tr>
+                        <th scope="row"> {{ task.submission_id }}</th>
+                    {% if task.status %}
+                    <td>{{ task.assignee }}</td>
+                    <td> <a href="{% url 'the_process:get_task' task.submission_id %}">View Task</a></td>
+                    <td scope="col">{{ task.status }}</td>
+                    {% else %}
+                    <td>null</td>
+                    <td> <a href="{% url 'the_process:get_task' task.submission_id %}">Get Task</a></td>
+                    <td scope="col">Not started</td>
+                    {% endif %}
+                    <td> {{ task.username }}</td>
+                  </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <style>
+              .table-bordered td,
+              .table-bordered th {
+                  border-color: black !important;
+              }
+      
+          </style>
+        </div>
+<br>
+
+<hr>
+
+<div class="alert alert-primary">
+  To Start execution
+</div>
+  
+  <div class="container col-md-6 align-center justify-content-center">
+      <form class="form" method="post" action="/submit/">
+          {% csrf_token %}
+          {{ the_form|crispy }}
+          <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+  </div>
+<br>
+
+{% endblock %}
