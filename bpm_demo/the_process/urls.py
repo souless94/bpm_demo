@@ -1,11 +1,14 @@
-from django.urls import path , include
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from . import views
+
+router = DefaultRouter()
+router.register('state', views.StateViewSet)
+router.register('processForm', views.ProcessFormViewSet)
 
 app_name = 'the_process'
 
 urlpatterns = [
-    path('',views.index ),
-    path('submit/', views.submit),
-    path('start_execution/', views.start_execution),
-    path('get_task/<str:taskId>/', views.get_task, name='get_task')
+    path('', include(router.urls))
 ]
