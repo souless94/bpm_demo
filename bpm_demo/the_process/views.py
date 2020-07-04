@@ -7,7 +7,7 @@ class ProcessFormViewSet(viewsets.ModelViewSet):
     """ Viewset for Content with all the methods """
     serializer_class = serializers.ProcessFormSerializer
     queryset = ProcessForm.objects.all()
-    filterset_fields = '__all__'
+    filterset_fields = ['id',]
 
 class StateViewSet(viewsets.ModelViewSet):
     """ Viewset for Content with all the methods """

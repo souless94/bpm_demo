@@ -4,6 +4,7 @@ import {HttpClientModule} from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './Home/Home.component';
+import { FrontComponent } from './front/front.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatStepperModule } from '@angular/material/stepper';
@@ -18,29 +19,33 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {StateService} from '../app/_services/State.service';
 import {ProcessFormService} from '../app/_services/ProcessForm.service';
 
+
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatStepperModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatCardModule,
-  ],
-  providers: [
-    StateService,
-    ProcessFormService,
-  ],
-  bootstrap: [AppComponent]
+   declarations: [
+      AppComponent,
+      HomeComponent,
+      FrontComponent
+   ],
+   imports: [
+      BrowserModule,
+      HttpClientModule,
+      BrowserAnimationsModule,
+      FormsModule,
+      ReactiveFormsModule,
+      MatStepperModule,
+      MatButtonModule,
+      MatDatepickerModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatIconModule,
+      MatCardModule
+   ],
+   providers: [
+      StateService,
+      ProcessFormService
+   ],
+   bootstrap: [
+      AppComponent
+   ]
 })
 export class AppModule { }

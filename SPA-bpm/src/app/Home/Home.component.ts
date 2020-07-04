@@ -14,13 +14,13 @@ import { StateService } from '../_services/State.service';
 export class HomeComponent implements OnInit {
   FirstProcessForm: FormGroup;
   SecondProcessForm: FormGroup;
+  id = localStorage.getItem('id');
 
   constructor(private fb: FormBuilder,private stateService: StateService) { }
 
   ngOnInit() {
     this.FirstProcessForm = this.createProcessForm();
     this.SecondProcessForm = this.createProcessForm();
-    this.loadTasks();
   }
 
   createProcessForm() {
@@ -32,14 +32,12 @@ export class HomeComponent implements OnInit {
       }
     );
   }
+  
+  getTask(id:string){
 
-  loadTasks(){
-    return this.stateService.getTasks('Not Started').subscribe(
-      (res) => {
-        console.log(res);
-      }
-    )
   }
+
+
 
 
 }

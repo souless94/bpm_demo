@@ -13,19 +13,27 @@ constructor(private http: HttpClient) { }
 getTasks(status: string) {
     let params = new HttpParams();
     params = params.append('status', status);
-    return this.http.get(this.baseUrl + 'State/',{params});
+    return this.http.get(this.baseUrl + 'state/', {params});
 }
 
 submitForm(processForm: ProcessForm){
     return this.http.post(this.baseUrl + 'processForm/', processForm);
 }
 
-updateState(id: string, state: State){
-    return this.http.patch(this.baseUrl + 'State/' + id, state);
+startTask(id: string,assignee: string){
+    const payload = {
+        status : 'Started',
+        assignee
+    }
+    return this.http.patch(this.baseUrl + 'state/' + id +'/',payload );
 }
 
-getState(id: string){
-    return this.http.get<State>(this.baseUrl + 'State/' + id);
+updateState(id: string, state: State){
+    return this.http.patch(this.baseUrl + 'state/' + id, state);
+}
+
+getTask(id: string){
+    return this.http.get<State[]>(this.baseUrl + 'state/' + id);
 }
 
 }

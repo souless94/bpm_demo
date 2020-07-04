@@ -1,0 +1,20 @@
+<table>
+  <thead>
+    <tr>
+        <th scope="col">TaskId</th>
+        <th scope="col">title</th>
+        <th scope="col">status</th>
+        <th scope="col">TaskOwner</th>
+        <th scope="col">getTask</th>
+    </tr>
+</thead>
+<tbody>
+  <tr *ngFor="let task of tasks">
+    <td>{{ task.id }}</td>
+    <td>{{ task.name }}</td>
+    <td>{{ task.status }}</td>
+    <td>{{ task.assignee }}</td>
+    <td><button (click)="startTask(task.id)">Get Task</button></td>
+  </tr>
+  </tbody>
+</table>
