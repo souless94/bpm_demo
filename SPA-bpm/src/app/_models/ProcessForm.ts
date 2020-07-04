@@ -1,5 +1,6 @@
 export interface ProcessForm {
     id: number;
-    inputs: any;
+    name: string;
+    comments: any;
     theFile: any;
   }

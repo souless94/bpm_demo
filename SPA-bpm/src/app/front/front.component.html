@@ -18,3 +18,32 @@
   </tr>
   </tbody>
 </table>
+
+<div class="container col-md-12 justify-content-center mr-10">
+<form class="form justify-content-center"  [formGroup]="taskForm" (ngSubmit)="createTask()">
+  <h2> Start new Task</h2>
+      <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput placeholder="name" formControlName="name" required>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>status</mat-label>
+        <input matInput placeholder="status" formControlName="status" required>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>workflow</mat-label>
+        <input matInput placeholder="workflow" formControlName="workflow"  required>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>assignee</mat-label>
+        <input matInput placeholder="assignee" formControlName="assignee"  required>
+      </mat-form-field>
+      <br>
+      <button mat-raised-button color="primary" class="mr-3" type="submit">
+        Start
+      </button>
+</form>
+</div>

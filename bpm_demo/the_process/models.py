@@ -7,7 +7,7 @@ import uuid
 class ProcessForm(models.Model):
     # process inputs later
     name = models.CharField(max_length=255)
-    inputs = JSONField()
+    comments = models.TextField()
     fileUpload = models.FileField( upload_to='file_uploads',blank=True)
 
 class State(models.Model):

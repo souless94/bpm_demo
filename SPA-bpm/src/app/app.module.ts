@@ -1,11 +1,13 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import {HttpClientModule} from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './Home/Home.component';
 import { FrontComponent } from './front/front.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { appRoutes } from './routes';
 
 import { MatStepperModule } from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -38,7 +40,8 @@ import {ProcessFormService} from '../app/_services/ProcessForm.service';
       MatFormFieldModule,
       MatInputModule,
       MatIconModule,
-      MatCardModule
+      MatCardModule,
+      RouterModule.forRoot(appRoutes),
    ],
    providers: [
       StateService,

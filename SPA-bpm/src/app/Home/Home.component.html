@@ -1,42 +1,24 @@
 <hr>
-you are on taskid {{ id }}
-<mat-horizontal-stepper *ngIf="id" [linear]="true" #stepper>
-  <mat-step [stepControl]="FirstProcessForm">
+<h1>submission id : {{ state?.id }}</h1>
+<mat-horizontal-stepper [linear]="true" #stepper [selectedIndex]="currentStatusIndex">
+  <div class="container" *ngFor="let step of steps" >
+  <mat-step [stepControl]="FirstProcessForm" [editable]="false">
     <form [formGroup]="FirstProcessForm">
-      <ng-template matStepLabel>Fill out your name</ng-template>
+      <ng-template matStepLabel>{{ step }}</ng-template>
+      <h2>{{ step }}</h2>
       <mat-form-field>
         <mat-label>Name</mat-label>
-        <input matInput placeholder="Last name, First name" formControlName="name" required>
+        <input matInput placeholder="name" formControlName="name" required>
       </mat-form-field>
+      <br>
       <mat-form-field>
-        <mat-label>Name</mat-label>
-        <input matInput placeholder="message" formControlName="message" required>
+        <mat-label>comments</mat-label>
+        <input matInput placeholder="comments" formControlName="comments" required>
       </mat-form-field>
       <div>
-        <button mat-button matStepperNext>Next</button>
+        <button mat-button matStepperNext (click)="submitForm(step)">Next</button>
       </div>
     </form>
   </mat-step>
-  <mat-step [stepControl]="SecondProcessForm">
-    <form [formGroup]="SecondProcessForm">
-      <ng-template matStepLabel>Fill out your address</ng-template>
-      <mat-form-field>
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="name" placeholder="Ex. 1 Main St, New York, NY"
-               required>
-      </mat-form-field>
-      <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button matStepperNext>Next</button>
-      </div>
-    </form>
-  </mat-step>
-  <mat-step>
-    <ng-template matStepLabel>Done</ng-template>
-    <p>You are now done.</p>
-    <div>
-      <button mat-button matStepperPrevious>Back</button>
-      <button mat-button (click)="stepper.reset()">Reset</button>
-    </div>
-  </mat-step>
+</div>
 </mat-horizontal-stepper>

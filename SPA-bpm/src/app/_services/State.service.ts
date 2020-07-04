@@ -22,18 +22,22 @@ submitForm(processForm: ProcessForm){
 
 startTask(id: string,assignee: string){
     const payload = {
-        status : 'Started',
+        status : 'Start',
         assignee
     }
     return this.http.patch(this.baseUrl + 'state/' + id +'/',payload );
 }
 
-updateState(id: string, state: State){
-    return this.http.patch(this.baseUrl + 'state/' + id, state);
+updateState(id: string, state: string){
+    return this.http.patch(this.baseUrl + 'state/' + id +'/',{"status" : state});
 }
 
 getTask(id: string){
-    return this.http.get<State[]>(this.baseUrl + 'state/' + id);
+    return this.http.get<State>(this.baseUrl + 'state/' + id);
+}
+
+createTask(state:State){
+    return this.http.post(this.baseUrl + 'state/', state);
 }
 
 }
