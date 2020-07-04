@@ -39,7 +39,7 @@ def get_task(request,taskId):
         state_form = StateForm(instance=the_state)
         the_state = the_state.status
         
-    diagram = ['start','verify','approve']
+    diagram = ['start','verify','reassign','approve']
     context = {'state_form':state_form, 'diagram':diagram ,'the_state':the_state,'username':username}
     return render(request,'submit.html',context)
 

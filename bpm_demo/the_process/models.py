@@ -7,6 +7,7 @@ import uuid
 CHOICES = [
     ('start','start'),
     ('verify','verify'),
+    ('reassign','reassign'),
     ('approve','approve')
 ]
 
