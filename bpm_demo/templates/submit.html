@@ -8,32 +8,15 @@
 <div class="btn btn-primary-outline"><a href="/">home</a></div>
 
 <div class="alert alert-primary">
-    Welcome {{username}}  Diagram
-  </div> 
-  <div class="container ">
-  <nav >
-    <ul class="pagination justify-content-center">
-    {% for choices in diagram %}
-    {% if choices == the_state %}
-      <li class="page-item active">
-        <span class="page-link">{{choices}}</span>
-      </li>
-      {% else %}
-      <li class="page-item ">
-        <span class="page-link">{{choices}}</span>
-      </li>
-      {% endif %}
-      {% endfor %}
-    </ul>
-</nav>
+    current status : {{latest_status}}
 </div> 
 
 <div class="alert alert-primary">
-    Verify application
+    Verify/approve application
   </div>
     
     <div class="container col-md-6 align-center justify-content-center">
-        <form class="form" method="post" action="/start_execution/">
+        <form class="form" method="post" action="/approve/">
             {% csrf_token %}
             {{ state_form |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>

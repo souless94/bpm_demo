@@ -13,26 +13,24 @@
                     <tr>
                         <th scope="col">TaskId</th>
                         <th scope="col">assignee</th>
-                        <th scope="col">view task</th>
                         <th scope="col">state</th>
-                        <th scope="col">By</th>
-
-                    </tr>
+                        <th scope="col">view task</th>
+                 </tr>
                 </thead>
                 <tbody>
                     {% for task in inbox %}
                     <tr>
-                        <th scope="row"> {{ task.submission_id }}</th>
-                    {% if task.status %}
+                        <th scope="row"> {{ task.id }}</th>
+                    {% if task.current_status %}
                     <td>{{ task.assignee }}</td>
-                    <td> <a href="{% url 'the_process:get_task' task.submission_id %}">View Task</a></td>
-                    <td scope="col">{{ task.status }}</td>
+                    <td scope="col">{{ task.current_status }}</td>
+                    <td> <a href="{% url 'the_process:get_task' task.id %}">View Task</a></td>
                     {% else %}
                     <td>null</td>
-                    <td> <a href="{% url 'the_process:get_task' task.submission_id %}">Get Task</a></td>
                     <td scope="col">Not started</td>
+                    <td> <a href="{% url 'the_process:get_task' task.id %}">Get Task</a></td>
+                    
                     {% endif %}
-                    <td> {{ task.username }}</td>
                   </tr>
                     {% endfor %}
                 </tbody>

@@ -1,13 +1,7 @@
 from django.forms import ModelForm
-from .models import Task , state
+from .models import Submission
 
-class TaskForm(ModelForm):
+class SubmissionForm(ModelForm):
     class Meta:
-        model = Task
-        fields = '__all__'
-        exclude = ('diagram',)
-
-class StateForm(ModelForm):
-    class Meta:
-        model = state
+        model = Submission
         fields = '__all__'

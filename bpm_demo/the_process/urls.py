@@ -5,7 +5,7 @@ app_name = 'the_process'
 
 urlpatterns = [
     path('',views.index ),
-    path('submit/', views.submit),
-    path('start_execution/', views.start_execution),
-    path('get_task/<str:taskId>/', views.get_task, name='get_task')
+    path('submit/',views.start_execution),
+    path('the_process/<int:id>',views.get_task,name='get_task'),
+    path('approve/',views.submit),
 ]
