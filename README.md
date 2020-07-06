@@ -1,4 +1,4 @@
-# bpm_demo
+# bpm_demo via code only
 
 Step 1 : get task
 Step 2: submit task 
