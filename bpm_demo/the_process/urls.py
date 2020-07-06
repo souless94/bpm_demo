@@ -8,4 +8,5 @@ urlpatterns = [
     path('submit/',views.start_execution),
     path('the_process/<int:id>',views.get_task,name='get_task'),
     path('approve/',views.submit),
+    path('resume/',views.resume),
 ]

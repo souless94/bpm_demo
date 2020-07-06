@@ -60,4 +60,21 @@
   </div>
 <br>
 
+<div class="alert alert-primary">
+    To resume execution
+  </div>
+    
+    <div class="container col-md-6 align-center justify-content-center">
+        <form class="form" method="post" action="/resume/">
+            {% csrf_token %}
+            <label>title</label><input name="id" class="col-md-4 form-control" type="text" >
+            <label>State</label><input name="state" class="col-md-4 form-control" type="text" >
+            <label>inputs</label><input name="inputs" class="col-md-4 form-control" type="text" >
+            <br>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+    </div>
+  <br>
+
 {% endblock %}
+

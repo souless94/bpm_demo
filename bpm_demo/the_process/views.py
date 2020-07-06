@@ -4,11 +4,12 @@ from .models import Submission
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from django.utils.timezone import now
+import uuid
 import json
 import boto3
 
 state_machine_arn="arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
-
+workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-3d33a29f"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
@@ -41,6 +42,10 @@ def get_execution_history(execution_arn):
             executionArn = execution_arn
     )
     result = response.get('events')
+    if (result[-1].get('executionFailedEventDetails')):
+        error = result[-1]['executionFailedEventDetails']['error']
+        if (str(error) == 'States.Timeout'):
+            return 'Please resume from resume function'
     result = list(map(lambda d: d.get('stateEnteredEventDetails'), result))
     result = list(filter(lambda d: d != None , result))
     result = list(map(lambda d: d.get('name') , result))
@@ -88,11 +93,35 @@ def submit(request):
     title = data['title']
     the_task = Submission.objects.get(title=title)
     the_form = SubmissionForm(request.POST, instance=the_task)
+    status = data['choice']
     if the_form.is_valid():
         comment = data['comment']
-        status = "Continue"
         the_form.save()
         submit_approval(title,status,comment)
     return redirect('/')
 
+@never_cache
+@require_POST
+def resume(request):
+    data = request.POST.dict()
+    id = data['id']
+    inputs = json.loads(data['inputs'])
+    inputs['mode']='Skip'
+    state = data['state']
+    definition = sfn.describe_state_machine(stateMachineArn=state_machine_arn)['definition']
+    definition= json.loads(definition)
+    definition["States"]["Mode"]["Default"] = state
+    definition = json.dumps(definition)
+    response = sfn.create_state_machine(
+        name="resume{}".format(str(uuid.uuid4())), definition=definition, roleArn=workflow_execution_role)
+    execution_response = sfn.start_execution(
+        stateMachineArn=response['stateMachineArn'],
+        input=json.dumps(inputs)
+    )
+    the_task = Submission.objects.get(title=id)
+    the_task.state_machine = response['stateMachineArn']
+    the_task.current_status = state
+    the_task.execution_name = execution_response['executionArn']
+    the_task.save()
+    return redirect('/')
 
