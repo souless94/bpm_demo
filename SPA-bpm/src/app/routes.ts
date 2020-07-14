@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './Home/Home.component';
 import { FrontComponent } from './front/front.component';
+import { CreateInspectionComponent } from './CreateInspection/CreateInspection.component';
 
 export const appRoutes: Routes = [
   {
@@ -12,6 +13,10 @@ export const appRoutes: Routes = [
     redirectTo: '',
     pathMatch: 'full',
     component: FrontComponent,
+  },
+  {
+    path: 'create',
+    component: CreateInspectionComponent,
   },
   {
     path: '**',

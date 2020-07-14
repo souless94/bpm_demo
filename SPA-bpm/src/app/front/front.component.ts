@@ -27,7 +27,7 @@ export class FrontComponent implements OnInit {
   }
 
   loadTasks(){
-    return this.stateService.getTasks('Not Started').subscribe(
+    return this.stateService.getTasks('').subscribe(
       (res: State[]) => {
         this.tasks = res;
         console.log(this.tasks);

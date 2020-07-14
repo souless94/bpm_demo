@@ -1,4 +1,4 @@
-<table>
+<table class="table table-hover">
   <thead>
     <tr>
         <th scope="col">TaskId</th>
@@ -14,13 +14,13 @@
     <td>{{ task.name }}</td>
     <td>{{ task.status }}</td>
     <td>{{ task.assignee }}</td>
-    <td><button (click)="startTask(task.id)">Get Task</button></td>
+    <td><button class="btn btn-primary" (click)="startTask(task.id)">Get Task</button></td>
   </tr>
   </tbody>
 </table>
-
+<a [routerLink]="['/create']" >click here</a>
 <div class="container col-md-12 justify-content-center mr-10">
-<form class="form justify-content-center"  [formGroup]="taskForm" (ngSubmit)="createTask()">
+<form class="form"  [formGroup]="taskForm" (ngSubmit)="createTask()">
   <h2> Start new Task</h2>
       <mat-form-field>
         <mat-label>Name</mat-label>

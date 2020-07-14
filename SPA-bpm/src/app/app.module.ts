@@ -20,13 +20,15 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import {StateService} from '../app/_services/State.service';
 import {ProcessFormService} from '../app/_services/ProcessForm.service';
+import { CreateInspectionComponent } from './CreateInspection/CreateInspection.component';
 
 
 @NgModule({
    declarations: [
       AppComponent,
       HomeComponent,
-      FrontComponent
+      FrontComponent,
+      CreateInspectionComponent
    ],
    imports: [
       BrowserModule,
@@ -41,7 +43,7 @@ import {ProcessFormService} from '../app/_services/ProcessForm.service';
       MatInputModule,
       MatIconModule,
       MatCardModule,
-      RouterModule.forRoot(appRoutes),
+      RouterModule.forRoot(appRoutes)
    ],
    providers: [
       StateService,

@@ -1,10 +1,8 @@
-<hr>
-<h1>submission id : {{ state?.id }}</h1>
-<mat-horizontal-stepper [linear]="true" #stepper [selectedIndex]="currentStatusIndex">
-  <div class="container" *ngFor="let step of steps" >
-  <mat-step [stepControl]="FirstProcessForm" [editable]="false">
-    <form [formGroup]="FirstProcessForm">
-      <ng-template matStepLabel>{{ step }}</ng-template>
+<a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
+<h1 class="justify-content-center">submission id : {{ state?.id }}</h1>
+  <div class="container " *ngFor="let step of steps" >
+    <div class="row justify-content-center">
+    <form  [formGroup]="FirstProcessForm">
       <h2>{{ step }}</h2>
       <mat-form-field>
         <mat-label>Name</mat-label>
@@ -16,9 +14,9 @@
         <input matInput placeholder="comments" formControlName="comments" required>
       </mat-form-field>
       <div>
-        <button mat-button matStepperNext (click)="submitForm(step)">Next</button>
+        <button mat-button (click)="submitForm(step)">Next</button>
       </div>
     </form>
-  </mat-step>
+    <br>
 </div>
-</mat-horizontal-stepper>
+</div>

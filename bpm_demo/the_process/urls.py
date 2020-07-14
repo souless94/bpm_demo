@@ -6,6 +6,7 @@ from . import views
 router = DefaultRouter()
 router.register('state', views.StateViewSet)
 router.register('processForm', views.ProcessFormViewSet)
+router.register('createInspectionForm', views.CreateInspectionFormViewSet)
 
 app_name = 'the_process'
 
