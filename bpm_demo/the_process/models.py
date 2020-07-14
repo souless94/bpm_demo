@@ -3,22 +3,6 @@ from django.utils.timezone import now
 from jsonfield import JSONField
 import uuid
 # Create your models here.
-
-class ProcessForm(models.Model):
-    # process inputs later
-    name = models.CharField(max_length=255)
-    comments = models.TextField()
-    fileUpload = models.FileField( upload_to='file_uploads',blank=True)
-
-class CreateInspectionForm(models.Model):
-    inspectionCategory = models.CharField(max_length=255)
-    inspectionType = models.CharField(max_length=255)
-    reference = models.CharField(max_length=255,blank=True)
-    referenceNo = models.CharField(max_length=255,blank=True)
-    arrivalDate = models.DateField(default=now)
-    TeamDetails = models.CharField(max_length=255)
-    workPlaceNo = models.CharField(max_length=255)
-
 class State(models.Model):
     # process inputs later
     name = models.CharField(max_length=255)
@@ -26,3 +10,52 @@ class State(models.Model):
     workflow = JSONField()
     assignee = models.CharField(max_length=255,default='Not Assigned')
     submitTime = models.DateTimeField(default=now)
+    # to check if state is ready and what else is not ready
+    isReady = models.BooleanField(default=False)
+    LeftReady = JSONField(blank=True)
+
+# per screen per form
+class CreateInspectionForm(models.Model):
+    inspectionCategory = models.CharField(max_length=255)
+    inspectionType = models.CharField(max_length=255)
+    reference = models.CharField(max_length=255,blank=True)
+    referenceNo = models.CharField(max_length=255,blank=True)
+    arrivalDate = models.DateField(default=now,blank=True)
+    TeamDetails = models.CharField(max_length=255)
+    workPlaceNo = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+class FindingsForm(models.Model):
+    findings = JSONField(blank=True)
+    description = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+class QuestionaireForm(models.Model):
+    # is there any more features? 
+    # what features to implement ? feature a, b , c,d
+    questions = JSONField(blank=True)
+    response = JSONField(blank=True)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+class WarningsForm(models.Model):
+    # warnings, stop work order
+    enforcementAction = models.CharField(max_length=255)
+    law = models.CharField(max_length=255)
+    act = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+class SWOForm(models.Model):
+    # warnings, stop work order
+    orderNo = models.CharField(max_length=255)
+    proposal = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+class ApprovalForm(models.Model):
+    clarifications = models.CharField(max_length=255)
+    approve = models.BooleanField(default=False)
+    officerName = models.CharField(max_length=255)
+    remarks = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+

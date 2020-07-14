@@ -5,4 +5,6 @@ export interface State {
     workflow: string;
     assignee: string;
     submitTime: Date;
+    isReady: boolean;
+    leftReady: string;
 }

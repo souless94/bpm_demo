@@ -12,10 +12,13 @@ import { appRoutes } from './routes';
 import { MatStepperModule } from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatButtonModule} from '@angular/material/button';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatTimepickerModule } from 'mat-timepicker';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
+import {MatSelectModule} from '@angular/material/select';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import {StateService} from '../app/_services/State.service';
@@ -38,11 +41,14 @@ import { CreateInspectionComponent } from './CreateInspection/CreateInspection.c
       ReactiveFormsModule,
       MatStepperModule,
       MatButtonModule,
+      MatNativeDateModule,
       MatDatepickerModule,
+      MatTimepickerModule,
       MatFormFieldModule,
       MatInputModule,
       MatIconModule,
       MatCardModule,
+      MatSelectModule,
       RouterModule.forRoot(appRoutes)
    ],
    providers: [

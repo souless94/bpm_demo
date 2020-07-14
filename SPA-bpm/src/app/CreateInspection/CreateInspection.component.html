@@ -1,3 +1,95 @@
-<p>
-  CreateInspection works!
-</p>
+<a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
+
+<div class="container ">
+  <div class="row justify-content-center">
+<form class="form"  [formGroup]="inspectionForm" (ngSubmit)="createInspection()">
+  <h2> Start new Inspection</h2>
+      <mat-form-field>
+        <mat-label>inspectionCategory</mat-label>
+        <mat-select formControlName="inspectionCategory" >
+          <mat-option *ngFor="let inspectionCategory of inspectionCategories" [value]="inspectionCategory">{{inspectionCategory}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>inspectionType</mat-label>
+        <mat-select formControlName="inspectionType">
+          <mat-option *ngFor="let inspectionType of inspectionTypes" [value]="inspectionType">{{inspectionType}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>reference</mat-label>
+        <mat-select formControlName="reference" >
+          <mat-option *ngFor="let reference of references" [value]="reference">{{reference}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>reference No</mat-label>
+        <input matInput formControlName="referenceNo" >
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>Arrival Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="arrivalDate" value="2020-07-14">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>Arrival Time</mat-label>
+        <input matTimepicker>
+      </mat-form-field>
+      <br>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+              <th scope="col">name</th>
+              <th scope="col">title</th>
+              <th scope="col">add</th>
+          </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" formControlName="TeamDetails" readonly> </td>
+          <td>Inspector</td>
+          <td><button type="button" (click)="nothing()" class="btn btn-primary">add</button></td>
+        </tr>
+      </tbody>
+    </table>
+      <br>
+      <button mat-raised-button color="primary" class="mr-3" type="button" (click)="nextIt()">
+        Next
+      </button>
+
+<hr>
+<div class="container" *ngIf="isNext">
+  <mat-form-field>
+    <mat-label>WorkPlace No.</mat-label>
+    <input matInput formControlName="workPlaceNo">
+  </mat-form-field>
+    <br>
+    <button type="button" class="btn btn-primary" (click)="search()">search workplace</button>
+    <hr>
+    <table *ngIf="workplace" class="table table-bordered">
+    <tbody>
+      <tr>
+        <td>workplace info</td>
+        <td>citibank</td>
+      </tr>
+      <tr>
+        <td>workplace location</td>
+        <td>Singapore</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <br>
+  <button mat-raised-button color="primary" class="mr-3" type="submit">
+    Create Inspection
+  </button>
+</div>
+</form>
+</div></div>
+<br>

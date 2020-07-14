@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ProcessForm } from '../_models/processForm';
 import { environment } from 'src/environments/environment';
 import { State } from '../_models/State';
+import { CreateInspectionForm } from '../_models/CreateInspectionForm';
 
 @Injectable()
 export class StateService {
@@ -16,13 +16,9 @@ getTasks(status: string) {
     return this.http.get(this.baseUrl + 'state/', {params});
 }
 
-submitForm(processForm: ProcessForm){
-    return this.http.post(this.baseUrl + 'processForm/', processForm);
-}
-
-startTask(id: string,assignee: string){
+startTask(id: string,assignee: string,status:string){
     const payload = {
-        status : 'Start',
+        status,
         assignee
     }
     return this.http.patch(this.baseUrl + 'state/' + id +'/',payload );
@@ -38,6 +34,10 @@ getTask(id: string){
 
 createTask(state:State){
     return this.http.post(this.baseUrl + 'state/', state);
+}
+
+createInspection(createInspectionForm: CreateInspectionForm){
+    return this.http.post(this.baseUrl + 'createInspectionForm/', createInspectionForm);
 }
 
 }
