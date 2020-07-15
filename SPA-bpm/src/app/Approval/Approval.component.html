@@ -1,3 +1,50 @@
-<p>
-  Approval works!
-</p>
+<a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
+<h1 class="justify-content-center">submission id : {{ state?.id }}</h1>
+<h2>Left : {{state?.LeftReady}}</h2>
+<h2>Vet/Approve</h2>
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <td>Inspection details</td>
+      <td><a [routerLink]="['/task',state?.id]" routerLinkActive="router-link-active">Inspection details</a> </td>
+    </tr>
+    <tr>
+      <td>Findings</td>
+      <td><a [routerLink]="['/findings',state?.id]" routerLinkActive="router-link-active">findings</a> </td>
+    </tr>
+    <tr>
+      <td>Questionaire</td>
+      <td><a [routerLink]="['/Questionaire',state?.id]" routerLinkActive="router-link-active">Questionaire</a> </td>
+    </tr>
+    <tr>
+      <td>Enforcement</td>
+      <td><a [routerLink]="['/enforcement',state?.id]" routerLinkActive="router-link-active">enforcement</a> </td>
+    </tr>
+    <tr>
+      <td>Vet/Approve</td>
+      <td><a [routerLink]="['/approval',state?.id]" routerLinkActive="router-link-active">approval</a> </td>
+    </tr>
+  </tbody>
+</table>
+<div class="container ">
+  <div class="row justify-content-center">
+<form class="form" [formGroup]="inspectionForm" (ngSubmit)="submitApproval()" >
+  <h2> Approval</h2>
+      <mat-form-field>
+        <mat-label>clarifications</mat-label>
+        <input matInput formControlName="clarifications" >
+      </mat-form-field>
+        <mat-radio-group formControlName="approve">
+          <mat-radio-button value="true">Yes</mat-radio-button>
+          <mat-radio-button value="false">No</mat-radio-button>
+        </mat-radio-group>
+      <mat-form-field>
+        <mat-label>officerName</mat-label>
+        <input matInput formControlName="officerName" >
+      </mat-form-field>
+      <br>
+      <button mat-raised-button color="primary" class="mr-3" type="submit" >
+        Ready for submission
+      </button>
+      </form>
+      </div></div>

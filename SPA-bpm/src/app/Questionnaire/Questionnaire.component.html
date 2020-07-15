@@ -1,3 +1,48 @@
-<p>
-  Questionnaire works!
-</p>
+<a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
+<h1 class="justify-content-center">submission id : {{ state?.id }}</h1>
+<h2>Left : {{state?.LeftReady}}</h2>
+<h2>Questionaire</h2>
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <td>Inspection details</td>
+      <td><a [routerLink]="['/task',state?.id]" routerLinkActive="router-link-active">Inspection details</a> </td>
+    </tr>
+    <tr>
+      <td>Findings</td>
+      <td><a [routerLink]="['/findings',state?.id]" routerLinkActive="router-link-active">findings</a> </td>
+    </tr>
+    <tr>
+      <td>Questionaire</td>
+      <td><a [routerLink]="['/Questionaire',state?.id]" routerLinkActive="router-link-active">Questionaire</a> </td>
+    </tr>
+    <tr>
+      <td>Enforcement</td>
+      <td><a [routerLink]="['/enforcement',state?.id]" routerLinkActive="router-link-active">enforcement</a> </td>
+    </tr>
+    <tr>
+      <td>Vet/Approve</td>
+      <td><a [routerLink]="['/approval',state?.id]" routerLinkActive="router-link-active">approval</a> </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="container ">
+  <div class="row justify-content-center">
+<form class="form" [formGroup]="inspectionForm" (ngSubmit)="submitQuestion()"  >
+  <h2> Findings</h2>
+  <div >
+      <mat-form-field>
+        <mat-label>Obeservations</mat-label>
+        <input matInput formControlName="questions">
+      </mat-form-field>
+      <mat-radio-group *ngFor="let option of responses" formControlName="response">
+        <mat-radio-button value="{{option}}">{{option}}</mat-radio-button>
+      </mat-radio-group>
+    </div>
+      <br>
+      <button mat-raised-button color="primary" class="mr-3" type="submit" >
+        Next
+      </button>
+      </form>
+      </div></div>

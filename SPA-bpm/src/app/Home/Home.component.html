@@ -10,19 +10,19 @@
     </tr>
     <tr>
       <td>Findings</td>
-      <td><a [routerLink]="['/findings']" routerLinkActive="router-link-active">findings</a> </td>
+      <td><a [routerLink]="['/findings',state?.id]" routerLinkActive="router-link-active">findings</a> </td>
     </tr>
     <tr>
       <td>Questionaire</td>
-      <td><a [routerLink]="['/Questionaire']" routerLinkActive="router-link-active">Questionaire</a> </td>
+      <td><a [routerLink]="['/Questionaire',state?.id]" routerLinkActive="router-link-active">Questionaire</a> </td>
     </tr>
     <tr>
       <td>Enforcement</td>
-      <td><a [routerLink]="['/enforcement']" routerLinkActive="router-link-active">enforcement</a> </td>
+      <td><a [routerLink]="['/enforcement',state?.id]" routerLinkActive="router-link-active">enforcement</a> </td>
     </tr>
     <tr>
       <td>Vet/Approve</td>
-      <td><a [routerLink]="['/approval']" routerLinkActive="router-link-active">approval</a> </td>
+      <td><a [routerLink]="['/approval',state?.id]" routerLinkActive="router-link-active">approval</a> </td>
     </tr>
   </tbody>
 </table>
@@ -30,16 +30,16 @@
 
 <div class="container ">
   <div class="row justify-content-center">
-<form class="form"  [formGroup]="inspectionForm" >
+<form class="form"  [formGroup]="inspectionForm" (ngSubmit)="updateInspection()" >
   <h2> Inspection details</h2>
       <mat-form-field>
         <mat-label>inspectionCategory</mat-label>
-        <input matInput formControlName="inspectionCategory" readonly>
+        <input matInput formControlName="inspectionCategory" >
       </mat-form-field>
       <br>
       <mat-form-field>
         <mat-label>inspectionType</mat-label>
-        <input matInput formControlName="inspectionType" readonly>
+        <input matInput formControlName="inspectionType">
       </mat-form-field>
       <br>
       <mat-form-field>
@@ -110,6 +110,9 @@
   </table>
   
   <br>
+  <button mat-raised-button color="primary" class="mr-3" type="submit">
+    Next
+  </button>
 
 </div>
 </form>

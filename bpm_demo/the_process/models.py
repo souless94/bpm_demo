@@ -11,7 +11,7 @@ class State(models.Model):
     assignee = models.CharField(max_length=255,default='Not Assigned')
     submitTime = models.DateTimeField(default=now)
     # to check if state is ready and what else is not ready
-    isReady = models.BooleanField(default=False)
+    done = models.BooleanField(default=False)
     LeftReady = JSONField(blank=True)
 
 # per screen per form
@@ -26,15 +26,15 @@ class CreateInspectionForm(models.Model):
     state = models.ForeignKey(State, on_delete=models.CASCADE)
 
 class FindingsForm(models.Model):
-    findings = JSONField(blank=True)
     description = models.CharField(max_length=255)
     state = models.ForeignKey(State, on_delete=models.CASCADE)
 
 class QuestionaireForm(models.Model):
     # is there any more features? 
     # what features to implement ? feature a, b , c,d
-    questions = JSONField(blank=True)
-    response = JSONField(blank=True)
+    questions = models.CharField(max_length=255,blank=True)
+    responses = models.CharField(max_length=255,blank=True)
+    response = models.CharField(max_length=255)
     state = models.ForeignKey(State, on_delete=models.CASCADE)
 
 class WarningsForm(models.Model):

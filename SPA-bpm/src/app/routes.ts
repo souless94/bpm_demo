@@ -6,6 +6,7 @@ import { FindingsComponent } from './findings/findings.component';
 import { EnforcementComponent } from './Enforcement/Enforcement.component';
 import { QuestionnaireComponent } from './Questionnaire/Questionnaire.component';
 import { ApprovalComponent } from './Approval/Approval.component';
+import { FinishComponent } from './finish/finish.component';
 
 export const appRoutes: Routes = [
   {
@@ -23,20 +24,24 @@ export const appRoutes: Routes = [
     component: CreateInspectionComponent,
   },
   {
-    path: 'findings',
+    path: 'findings/:id',
     component: FindingsComponent,
   },
   {
-    path: 'Questionaire',
+    path: 'Questionaire/:id',
     component: QuestionnaireComponent,
   },
   {
-    path: 'enforcement',
+    path: 'enforcement/:id',
     component: EnforcementComponent,
   },
   {
-    path: 'approval',
+    path: 'approval/:id',
     component: ApprovalComponent,
+  },
+  {
+    path: 'finish/:id',
+    component: FinishComponent,
   },
   {
     path: '**',

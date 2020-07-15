@@ -1,10 +1,10 @@
 export interface State {
-    id: number;
+    id: string;
     name: string;
     status: string;
     workflow: string;
     assignee: string;
     submitTime: Date;
-    isReady: boolean;
+    done: boolean;
     LeftReady: string;
 }

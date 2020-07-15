@@ -21,7 +21,7 @@ export class CreateInspectionComponent implements OnInit {
   isNext =false;
   workplace = false;
   task: any;
-  LeftReady= 'Update Inspection Detail, Workplace Detail';
+  LeftReady= 'Update Inspection Detail,Workplace Detail';
 
   inspectionCategories = ['engagement','general','program','Others'];
   inspectionTypes = ['unplanned','Complaint'];
@@ -53,13 +53,13 @@ export class CreateInspectionComponent implements OnInit {
     this.task = Object.assign({},{
       name: 'workflow 1',
       status: 'Create Inspection',
-      workflow: 'Create Inspection, Update Inspection , Vet/Approve Inspection',
+      workflow: 'Create Inspection,Update Inspection,Vet/Approve Inspection',
       Assignee: '',
       isReady: false,
       LeftReady: this.LeftReady
     });
     if (this.LeftReady !== '') {
-      alert(this.LeftReady);
+      alert('left to do : ' + this.LeftReady);
       return 'done';
     }
     return this.stateService.createTask(this.task).subscribe(
@@ -83,14 +83,20 @@ export class CreateInspectionComponent implements OnInit {
   nextIt(){
     this.isNext=true;
     const leftReady = this.LeftReady.split(',');
-    leftReady.splice(leftReady.indexOf('Update Inspection Detail'), 1);
+    const index =  leftReady.indexOf('Update Inspection Detail');
+    if (index !== -1) {
+      leftReady.splice(index, 1);
+    }
     this.LeftReady = leftReady.toString();
   }
 
   search(){
     this.workplace=true;
     const leftReady = this.LeftReady.split(',');
-    leftReady.splice(leftReady.indexOf('Workplace Detail'), 1);
+    const index =  leftReady.indexOf('Workplace Detail');
+    if (index !== -1) {
+      leftReady.splice(index, 1);
+    }
     this.LeftReady = leftReady.toString();
   }
 

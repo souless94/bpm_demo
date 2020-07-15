@@ -19,6 +19,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
 import {MatSelectModule} from '@angular/material/select';
+import {MatRadioModule} from '@angular/material/radio';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import {StateService} from '../app/_services/State.service';
@@ -28,6 +29,7 @@ import { FindingsComponent } from './findings/findings.component';
 import { QuestionnaireComponent } from './Questionnaire/Questionnaire.component';
 import { EnforcementComponent } from './Enforcement/Enforcement.component';
 import { ApprovalComponent } from './Approval/Approval.component';
+import { FinishComponent } from './finish/finish.component';
 
 
 @NgModule({
@@ -39,7 +41,8 @@ import { ApprovalComponent } from './Approval/Approval.component';
       FindingsComponent,
       QuestionnaireComponent,
       EnforcementComponent,
-      ApprovalComponent
+      ApprovalComponent,
+      FinishComponent
    ],
    imports: [
       BrowserModule,
@@ -48,6 +51,7 @@ import { ApprovalComponent } from './Approval/Approval.component';
       FormsModule,
       ReactiveFormsModule,
       MatStepperModule,
+      MatRadioModule,
       MatButtonModule,
       MatNativeDateModule,
       MatDatepickerModule,

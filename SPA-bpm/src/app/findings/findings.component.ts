@@ -8,6 +8,7 @@ import {
 import { StateService } from '../_services/State.service';
 import { ActivatedRoute } from '@angular/router';
 import { State } from '../_models/State';
+import { FindingsForm } from '../_models/FindingsForm';
 
 @Component({
   selector: 'app-findings',
@@ -18,6 +19,8 @@ export class FindingsComponent implements OnInit {
   state: State;
   id: string;
   inspectionForm: FormGroup;
+  findingForm: FindingsForm;
+  LeftReady: string;
 
   constructor(
     private fb: FormBuilder,
@@ -26,45 +29,52 @@ export class FindingsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // this.updateInspectionForm();
     this.id = this.route.snapshot.paramMap.get('id');
     this.getTask(this.id);
-    // this.getInspectionForm(this.id);
+    this.inspectionForm = this.createFindingForm();
   }
 
   getTask(id: string) {
     return this.stateService.getTask(id).subscribe((res) => {
       this.state = res;
+      this.LeftReady = this.state.LeftReady;
       console.log(this.state);
     });
   }
-  // getInspectionForm(id: string) {
-  //   return this.stateService.getInspectionForm(id).subscribe((res) => {
-  //     this.createInspectionForm = res[0];
-  //     this.inspectionForm.setValue({
-  //       inspectionCategory: this.createInspectionForm.inspectionCategory,
-  //       inspectionType: this.createInspectionForm.inspectionType,
-  //       reference: this.createInspectionForm.reference,
-  //       referenceNo: this.createInspectionForm.referenceNo,
-  //       TeamDetails: this.createInspectionForm.TeamDetails,
-  //       arrivalDate: this.createInspectionForm.arrivalDate,
-  //       workPlaceNo: this.createInspectionForm.workPlaceNo
-  //     });
-  //     console.log(res);
-  //   });
-  // }
+  createFindingForm() {
+    return this.fb.group(
+      {
+        description: ['', Validators.required],
+      }
+    );
+  }
 
-  // updateInspectionForm() {
-  //   this.inspectionForm = this.fb.group({
-  //     inspectionCategory: ['', Validators.required],
-  //     inspectionType: ['', Validators.required],
-  //     reference: [''],
-  //     referenceNo: [''],
-  //     TeamDetails: ['OSHD1', Validators.required],
-  //     arrivalDate: ['2020-07-14'],
-  //     workPlaceNo: ['', Validators.required],
-  //   });
-  // }
+  createFinding(){
+    this.findingForm = Object.assign({}, this.inspectionForm.value);
+    const leftReady = this.LeftReady.split(',');
+    const index =  leftReady.indexOf('Findings');
+    if (index !== -1) {
+      leftReady.splice(index, 1);
+    }
+    this.LeftReady = leftReady.toString();
+    console.log(this.LeftReady);
+
+    return this.stateService.updateState(this.state.id,{'LeftReady': this.LeftReady}).subscribe(
+      res => {
+        alert('state Updated');
+        this.findingForm['state'] = this.state.id;
+        this.stateService.createFinding(this.findingForm).subscribe(
+          res =>{
+            alert('finding Created');
+          }
+        )
+      }
+    )
+
+  }
+
+
+
 
 }
 

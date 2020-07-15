@@ -36,7 +36,7 @@ export class FrontComponent implements OnInit {
 
   startTask(id: string ){
     console.log('clicked ' + id);
-    const leftReady = 'Inspection details,Findings,Questionaire,Enforcement,Vet/Approve'
+    const leftReady = 'Inspection details,Findings,Questionaire,Enforcement,Vet/Approve Action';
     return this.stateService.startTask(id,'OSHD1','Update Inspection',leftReady).subscribe(
       res => {
         console.log('nagivate ? ')
@@ -53,5 +53,6 @@ export class FrontComponent implements OnInit {
       }
     );
   }
+
 
 }

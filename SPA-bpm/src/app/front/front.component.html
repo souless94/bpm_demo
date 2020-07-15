@@ -6,6 +6,7 @@
         <th scope="col">status</th>
         <th scope="col">TaskOwner</th>
         <th scope="col">getTask</th>
+        <th scope="col">Finished</th>
     </tr>
 </thead>
 <tbody>
@@ -15,7 +16,10 @@
     <td>{{ task.status }}</td>
     <td>{{ task.assignee }}</td>
     <td><button class="btn btn-primary" *ngIf="task.assignee === 'Not Assigned' " (click)="startTask(task.id)">Start Task</button>
-      <button class="btn btn-primary" *ngIf="task.assignee !== 'Not Assigned' " (click)="resumeTask(task.id)">resume Task</button></td>
+      <button class="btn btn-primary" *ngIf="task.assignee !== 'Not Assigned' && task.status !== 'Approved' " (click)="resumeTask(task.id)">resume Task</button></td>
+      <td>
+        <button class="btn btn-primary" *ngIf="task.status === 'Vet/Approve Inspection' " ><a style="color: honeydew;"   [routerLink]="['/finish',task.id]" routerLinkActive="router-link-active" >finish Task</a></button>
+      </td>
   </tr>
   </tbody>
 </table>

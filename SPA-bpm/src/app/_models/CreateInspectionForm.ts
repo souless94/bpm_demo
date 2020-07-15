@@ -1,5 +1,5 @@
 export interface CreateInspectionForm {
-  id: number;
+  id: string;
   inspectionCategory: string;
   inspectionType: string;
   reference: string;

@@ -1,0 +1,10 @@
+<h1>id: {{ approvalForm?.id}}</h1>
+<h1>clarifications: {{ approvalForm?.clarifications}}</h1>
+<h1>supported : {{ approvalForm?.approve}}</h1>
+<h1>officerName : {{ approvalForm?.officerName}}</h1>
+<h1>remarks: {{ approvalForm?.remarks}}</h1>
+
+
+<button mat-raised-button color="primary" type="submit"  (click)="finishTask(state.id)">Approve</button>
+<hr>
+<button mat-raised-button color="primary" type="submit" (click)="rejectTask(state.id)">Reject</button>
