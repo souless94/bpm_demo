@@ -6,5 +6,5 @@ export interface State {
     assignee: string;
     submitTime: Date;
     isReady: boolean;
-    leftReady: string;
+    LeftReady: string;
 }

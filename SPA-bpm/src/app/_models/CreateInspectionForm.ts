@@ -1,4 +1,5 @@
 export interface CreateInspectionForm {
+  id: number;
   inspectionCategory: string;
   inspectionType: string;
   reference: string;
@@ -6,4 +7,5 @@ export interface CreateInspectionForm {
   arrivalDate: Date;
   TeamDetails: string;
   workPlaceNo: string;
+  state: string;
 }

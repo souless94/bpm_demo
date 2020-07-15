@@ -11,25 +11,30 @@ export class StateService {
 constructor(private http: HttpClient) { }
 
 getTasks(status: string) {
-    let params = new HttpParams();
-    params = params.append('status', status);
-    return this.http.get(this.baseUrl + 'state/', {params});
+    return this.http.get(this.baseUrl + 'state/');
 }
 
-startTask(id: string,assignee: string,status:string){
+startTask(id: string,assignee: string,status:string, LeftReady: string){
     const payload = {
         status,
-        assignee
+        assignee,
+        LeftReady
     }
     return this.http.patch(this.baseUrl + 'state/' + id +'/',payload );
 }
 
-updateState(id: string, state: string){
-    return this.http.patch(this.baseUrl + 'state/' + id +'/',{"status" : state});
+updateState(id: string, params:any){
+    return this.http.patch(this.baseUrl + 'state/' + id +'/',params);
 }
 
 getTask(id: string){
     return this.http.get<State>(this.baseUrl + 'state/' + id);
+}
+
+getInspectionForm(id: string){
+    let params = new HttpParams();
+    params = params.append('state',id);
+    return this.http.get<CreateInspectionForm[]>(this.baseUrl + 'createInspectionForm/', {params});
 }
 
 createTask(state:State){
@@ -39,5 +44,6 @@ createTask(state:State){
 createInspection(createInspectionForm: CreateInspectionForm){
     return this.http.post(this.baseUrl + 'createInspectionForm/', createInspectionForm);
 }
+
 
 }

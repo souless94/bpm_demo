@@ -1,22 +1,117 @@
 <a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
 <h1 class="justify-content-center">submission id : {{ state?.id }}</h1>
-  <div class="container " *ngFor="let step of steps" >
-    <div class="row justify-content-center">
-    <form  [formGroup]="FirstProcessForm">
-      <h2>{{ step }}</h2>
+<h2>Left : {{state?.LeftReady}}</h2>
+<h2>Inspection details</h2>
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <td>Inspection details</td>
+      <td><a [routerLink]="['/task',state?.id]" routerLinkActive="router-link-active">Inspection details</a> </td>
+    </tr>
+    <tr>
+      <td>Findings</td>
+      <td><a [routerLink]="['/findings']" routerLinkActive="router-link-active">findings</a> </td>
+    </tr>
+    <tr>
+      <td>Questionaire</td>
+      <td><a [routerLink]="['/Questionaire']" routerLinkActive="router-link-active">Questionaire</a> </td>
+    </tr>
+    <tr>
+      <td>Enforcement</td>
+      <td><a [routerLink]="['/enforcement']" routerLinkActive="router-link-active">enforcement</a> </td>
+    </tr>
+    <tr>
+      <td>Vet/Approve</td>
+      <td><a [routerLink]="['/approval']" routerLinkActive="router-link-active">approval</a> </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<div class="container ">
+  <div class="row justify-content-center">
+<form class="form"  [formGroup]="inspectionForm" >
+  <h2> Inspection details</h2>
       <mat-form-field>
-        <mat-label>Name</mat-label>
-        <input matInput placeholder="name" formControlName="name" required>
+        <mat-label>inspectionCategory</mat-label>
+        <input matInput formControlName="inspectionCategory" readonly>
       </mat-form-field>
       <br>
       <mat-form-field>
-        <mat-label>comments</mat-label>
-        <input matInput placeholder="comments" formControlName="comments" required>
+        <mat-label>inspectionType</mat-label>
+        <input matInput formControlName="inspectionType" readonly>
       </mat-form-field>
-      <div>
-        <button mat-button (click)="submitForm(step)">Next</button>
-      </div>
-    </form>
+      <br>
+      <mat-form-field>
+        <mat-label>reference</mat-label>
+        <mat-select formControlName="reference" >
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>reference No</mat-label>
+        <input matInput formControlName="referenceNo" >
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>Arrival Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="arrivalDate" value="2020-07-14">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <mat-label>Arrival Time</mat-label>
+        <input matTimepicker>
+      </mat-form-field>
+      <br>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+              <th scope="col">name</th>
+              <th scope="col">title</th>
+              <th scope="col">add</th>
+          </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" formControlName="TeamDetails" readonly> </td>
+          <td>Inspector</td>
+          <td><button type="button" class="btn btn-primary">add</button></td>
+        </tr>
+      </tbody>
+    </table>
+      <br>
+      <button mat-raised-button color="primary" class="mr-3" type="button" >
+        Next
+      </button>
+
+<hr>
+<div class="container" >
+  <h2> WorkPlace details</h2>
+  <mat-form-field>
+    <mat-label>WorkPlace No.</mat-label>
+    <input matInput formControlName="workPlaceNo">
+  </mat-form-field>
     <br>
+    <button type="button" class="btn btn-primary">search workplace</button>
+    <hr>
+    <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <td>workplace info</td>
+        <td>citibank</td>
+      </tr>
+      <tr>
+        <td>workplace location</td>
+        <td>Singapore</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <br>
+
 </div>
-</div>
+</form>
+</div></div>
+<br>

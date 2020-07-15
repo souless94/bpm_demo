@@ -24,6 +24,10 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {StateService} from '../app/_services/State.service';
 import {ProcessFormService} from '../app/_services/ProcessForm.service';
 import { CreateInspectionComponent } from './CreateInspection/CreateInspection.component';
+import { FindingsComponent } from './findings/findings.component';
+import { QuestionnaireComponent } from './Questionnaire/Questionnaire.component';
+import { EnforcementComponent } from './Enforcement/Enforcement.component';
+import { ApprovalComponent } from './Approval/Approval.component';
 
 
 @NgModule({
@@ -31,7 +35,11 @@ import { CreateInspectionComponent } from './CreateInspection/CreateInspection.c
       AppComponent,
       HomeComponent,
       FrontComponent,
-      CreateInspectionComponent
+      CreateInspectionComponent,
+      FindingsComponent,
+      QuestionnaireComponent,
+      EnforcementComponent,
+      ApprovalComponent
    ],
    imports: [
       BrowserModule,

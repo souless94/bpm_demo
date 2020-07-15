@@ -36,7 +36,17 @@ export class FrontComponent implements OnInit {
 
   startTask(id: string ){
     console.log('clicked ' + id);
-    return this.stateService.startTask(id,'OSHD1','Update Inspection').subscribe(
+    const leftReady = 'Inspection details,Findings,Questionaire,Enforcement,Vet/Approve'
+    return this.stateService.startTask(id,'OSHD1','Update Inspection',leftReady).subscribe(
+      res => {
+        console.log('nagivate ? ')
+        this.router.navigate(['/task/' + id ]);
+      }
+    );
+  }
+
+  resumeTask(id: string ){
+    return this.stateService.updateState(id,{}).subscribe(
       res => {
         console.log('nagivate ? ')
         this.router.navigate(['/task/' + id ]);

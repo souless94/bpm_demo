@@ -14,7 +14,8 @@
     <td>{{ task.name }}</td>
     <td>{{ task.status }}</td>
     <td>{{ task.assignee }}</td>
-    <td><button class="btn btn-primary" (click)="startTask(task.id)">Get Task</button></td>
+    <td><button class="btn btn-primary" *ngIf="task.assignee === 'Not Assigned' " (click)="startTask(task.id)">Start Task</button>
+      <button class="btn btn-primary" *ngIf="task.assignee !== 'Not Assigned' " (click)="resumeTask(task.id)">resume Task</button></td>
   </tr>
   </tbody>
 </table>

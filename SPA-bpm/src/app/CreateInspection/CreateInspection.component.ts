@@ -21,6 +21,7 @@ export class CreateInspectionComponent implements OnInit {
   isNext =false;
   workplace = false;
   task: any;
+  LeftReady= 'Update Inspection Detail, Workplace Detail';
 
   inspectionCategories = ['engagement','general','program','Others'];
   inspectionTypes = ['unplanned','Complaint'];
@@ -53,12 +54,18 @@ export class CreateInspectionComponent implements OnInit {
       name: 'workflow 1',
       status: 'Create Inspection',
       workflow: 'Create Inspection, Update Inspection , Vet/Approve Inspection',
-      Assignee: 'OSHD1',
+      Assignee: '',
       isReady: false,
-      LeftReady: 'Update Inspection Detail, '
+      LeftReady: this.LeftReady
     });
+    if (this.LeftReady !== '') {
+      alert(this.LeftReady);
+      return 'done';
+    }
     return this.stateService.createTask(this.task).subscribe(
       res => {
+        const id = res['id'];
+        this.newInspection['state'] = id;
         alert('created task');
         this.stateService.createInspection(this.newInspection).subscribe(
           res =>{
@@ -75,10 +82,16 @@ export class CreateInspectionComponent implements OnInit {
 
   nextIt(){
     this.isNext=true;
+    const leftReady = this.LeftReady.split(',');
+    leftReady.splice(leftReady.indexOf('Update Inspection Detail'), 1);
+    this.LeftReady = leftReady.toString();
   }
 
   search(){
     this.workplace=true;
+    const leftReady = this.LeftReady.split(',');
+    leftReady.splice(leftReady.indexOf('Workplace Detail'), 1);
+    this.LeftReady = leftReady.toString();
   }
 
 }
