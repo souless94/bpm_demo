@@ -25,8 +25,9 @@ export class ApprovalComponent implements OnInit {
   LeftReady: string;
   responses = ['good','bad'];
   done= false;
-  steps: string[];
   currentStatusIndex: number;
+  steps: string[];
+  leftReadyArr: string[];
   
   constructor(
     private fb: FormBuilder,
@@ -48,6 +49,7 @@ export class ApprovalComponent implements OnInit {
       this.state = res;
       this.steps = this.state.workflow.split(',');
       this.currentStatusIndex = this.steps.indexOf(this.state.status);
+      this.leftReadyArr = this.LeftReady.split(',');
       console.log(this.state);
     });
   }

@@ -22,6 +22,9 @@ export class QuestionnaireComponent implements OnInit {
   questionaireForm: QuestionaireForm;
   LeftReady: string;
   responses = ['good','bad'];
+  currentStatusIndex: number;
+  steps: string[];
+  leftReadyArr: string[];
   
   constructor(
     private fb: FormBuilder,
@@ -39,6 +42,9 @@ export class QuestionnaireComponent implements OnInit {
     return this.stateService.getTask(id).subscribe((res) => {
       this.state = res;
       this.LeftReady = this.state.LeftReady;
+      this.steps = this.state.workflow.split(',');
+      this.currentStatusIndex = this.steps.indexOf(this.state.status);
+      this.leftReadyArr = this.LeftReady.split(',');
       console.log(this.state);
     });
   }

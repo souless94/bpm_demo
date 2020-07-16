@@ -21,6 +21,9 @@ export class FindingsComponent implements OnInit {
   inspectionForm: FormGroup;
   findingForm: FindingsForm;
   LeftReady: string;
+  currentStatusIndex: number;
+  steps: string[];
+  leftReadyArr: string[];
 
   constructor(
     private fb: FormBuilder,
@@ -38,6 +41,9 @@ export class FindingsComponent implements OnInit {
     return this.stateService.getTask(id).subscribe((res) => {
       this.state = res;
       this.LeftReady = this.state.LeftReady;
+      this.steps = this.state.workflow.split(',');
+      this.currentStatusIndex = this.steps.indexOf(this.state.status);
+      this.leftReadyArr = this.LeftReady.split(',');
       console.log(this.state);
     });
   }

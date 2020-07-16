@@ -1,28 +1,31 @@
 <a [routerLink]="['']" routerLinkActive="router-link-active" >Back</a>
 <h1 class="justify-content-center">submission id : {{ state?.id }}</h1>
+<h1>Workflow</h1>
+<div [ngClass]="step === state.status ? 'text-danger' : 'text-secondary' " *ngFor="let step of steps">{{step}}</div>
+<hr>
 <h2>Left : {{state?.LeftReady}}</h2>
-<h2>Questionaire</h2>
+<h2>Vet/Approve</h2>
 <table class="table table-bordered">
   <tbody>
     <tr>
       <td>Inspection details</td>
-      <td><a [routerLink]="['/task',state?.id]" routerLinkActive="router-link-active">Inspection details</a> </td>
+      <td><a [ngClass]="leftReadyArr.indexOf('Inspection details') === -1 ? 'text-secondary' : 'text-danger' " [routerLink]="['/task',state?.id]" routerLinkActive="router-link-active">Inspection details</a> </td>
     </tr>
     <tr>
       <td>Findings</td>
-      <td><a [routerLink]="['/findings',state?.id]" routerLinkActive="router-link-active">findings</a> </td>
+      <td><a [ngClass]="leftReadyArr.indexOf('Findings') === -1 ? 'text-secondary' : 'text-danger' " [routerLink]="['/findings',state?.id]" routerLinkActive="router-link-active">findings</a> </td>
     </tr>
     <tr>
       <td>Questionaire</td>
-      <td><a [routerLink]="['/Questionaire',state?.id]" routerLinkActive="router-link-active">Questionaire</a> </td>
+      <td><a [ngClass]="leftReadyArr.indexOf('Questionaire') === -1 ? 'text-secondary' : 'text-danger' " [routerLink]="['/Questionaire',state?.id]" routerLinkActive="router-link-active">Questionaire</a> </td>
     </tr>
     <tr>
       <td>Enforcement</td>
-      <td><a [routerLink]="['/enforcement',state?.id]" routerLinkActive="router-link-active">enforcement</a> </td>
+      <td><a [ngClass]="leftReadyArr.indexOf('Enforcement') === -1 ? 'text-secondary' : 'text-danger' " [routerLink]="['/enforcement',state?.id]" routerLinkActive="router-link-active">enforcement</a> </td>
     </tr>
     <tr>
       <td>Vet/Approve</td>
-      <td><a [routerLink]="['/approval',state?.id]" routerLinkActive="router-link-active">approval</a> </td>
+      <td><a [ngClass]="leftReadyArr.indexOf('Vet/Approve Action') === -1 ? 'text-secondary' : 'text-danger' " [routerLink]="['/approval',state?.id]" routerLinkActive="router-link-active">approval</a> </td>
     </tr>
   </tbody>
 </table>

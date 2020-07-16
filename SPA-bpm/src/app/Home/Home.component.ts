@@ -22,6 +22,9 @@ export class HomeComponent implements OnInit {
   createInspectionForm: CreateInspectionForm;
   LeftReady: string;
   inspectionFormId: string;
+  currentStatusIndex: number;
+  steps: string[];
+  leftReadyArr: string[];
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +44,9 @@ export class HomeComponent implements OnInit {
       this.state = res;
       console.log(this.state);
       this.LeftReady = this.state.LeftReady;
+      this.steps = this.state.workflow.split(',');
+      this.currentStatusIndex = this.steps.indexOf(this.state.status);
+      this.leftReadyArr = this.LeftReady.split(',');
     });
   }
   getInspectionForm(id: string) {
