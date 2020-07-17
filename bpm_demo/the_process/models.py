@@ -10,6 +10,36 @@ TYPE_CHOICES = (
     ('Supporting Documents', 'Supporting Documents')
 )
 
+# Model logic
+# 1) track current state from the step functions using execution history
+# 2) track the task submitted state 
+# -> filter for parallel state entered
+# -> execution arn of the sub processes so can compile it into an array and save it
+# 3) track subprocesses to do -> have an array of tasks to do when submit then update 
+# 4) if time out get the subprocesses that is completed and move to update inspection stage
+
+# Views logic
+# 1) create inspection -> step function triggered
+# 2) updateinspection -> Update_Inspection details -> send task success after getting task token via id+inspection_detail
+# 3) updateinspection -> findings -> send task success after getting task token via id+Findings
+# 4) updateinspection -> enforcement -> send task success after getting task token via id+enforcement
+# 5) updateinspection -> questionaire -> send task success after getting task token via id+question
+# 6) updateinspection -> send task success with the choices approve/Reassign/Clarification to go to approval stage/ update inspection again
+# 7) approval stage -> approve /reject
+
+#self code
+# # model logic
+# 1) state model will track main status and what is left for subprocesses.
+# 2) forms will be tied to an execution 
+# 3) frontend will update after all is submitted.
+
+#view logic
+# 1) create inspection -> create workflow and create form tag to the workflow id
+# 2) update inspection -> submit form and tag to workflow id and check if all is finished before submission
+# 3) approval stage ->  approve /reject
+
+
+
 
 class StepStatus(models.Model):
     title = models.CharField(max_length=255)

@@ -1,0 +1,17 @@
+import json
+import boto3
+
+def lambda_handler(event, context):
+    # TODO implement
+    task_token = event['TaskToken']
+    inputs = event['Input']['Input']['id']
+    id = inputs + 'inspection_details'
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('steps')
+    response = table.put_item(
+       Item={
+            "id": id,
+            "task_token": task_token
+        }
+    )
+    return response

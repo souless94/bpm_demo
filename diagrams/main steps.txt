@@ -1,0 +1,137 @@
+{
+  "Comment": "WorkFlow for Update inspection",
+  "StartAt": "Create Inspection",
+  "States": {
+    "Create Inspection": {
+      "Type": "Pass",
+      "Next": "Update Inspection Tasks"
+    },
+    "Update Inspection Tasks": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "Update Inspection Details",
+          "States": {
+            "Update Inspection Details": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:UpdateInspectionDetails",
+                "Input": {
+                  "Input.$": "$",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Findings",
+          "States": {
+            "Findings": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
+                "Input": {
+                  "Input.$": "$",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Questionaire",
+          "States": {
+            "Questionaire": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Questionaire",
+                "Input": {
+                  "Input.$": "$",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Enforcement Page",
+          "States": {
+            "Enforcement Page": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Enforcement",
+                "Input": {
+                  "Input.$": "$",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "Update Inspection"
+    },
+    "Update Inspection": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:normalsteps",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Vetting/Approval Choices"
+    },
+    "Vetting/Approval Choices": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.value",
+          "StringEquals": "Approve",
+          "Next": "Vetting/Approval"
+        },
+        {
+          "Variable": "$.value",
+          "StringEquals": "Approve",
+          "Next": "Reassign"
+        },
+        {
+          "Variable": "$.value",
+          "StringEquals": "Clarifications",
+          "Next": "Update Inspection"
+        }
+      ],
+      "Default": "Vetting/Approval"
+    },
+    "Reassign": {
+      "Type": "Pass",
+      "Next": "Vetting/Approval Choices"
+    },
+    "Vetting/Approval": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:normalsteps",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Print Contravention Letter"
+    },
+    "Print Contravention Letter": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+}

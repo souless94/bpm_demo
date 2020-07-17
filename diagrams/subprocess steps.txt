@@ -1,0 +1,22 @@
+{
+  "StartAt": "Enforcement",
+  "States": {
+        "Enforcement": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:step_enforcement",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "finish"
+    },
+    "finish": {
+      "Type": "Pass",
+      "Result": "World",
+      "End": true
+    }
+  }
+}
