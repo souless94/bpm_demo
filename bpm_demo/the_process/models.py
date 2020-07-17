@@ -4,87 +4,105 @@ from django.utils.timezone import now
 import uuid
 # Create your models here.
 
-    TYPE_CHOICES = (
-        ('Documents and Photos')
-        ('Photos')
-        ('Supporting Documents')
-    )
+TYPE_CHOICES = (
+    ('Documents and Photos', 'Documents and Photos'),
+    ('Photos', 'Photos'),
+    ('Supporting Documents', 'Supporting Documents')
+)
 
-class Submission(models.Model):
+
+class StepStatus(models.Model):
     title = models.CharField(max_length=255)
     state_machine = models.CharField(max_length=255)
-    execution_name = models.CharField(max_length=255)
+    execution_arn = models.CharField(max_length=255)
+    main = models.CharField(max_length=255)
     current_status = models.CharField(max_length=255)
-    comment = models.CharField(max_length=255)
     assignee = models.CharField(max_length=255)
-    submit_time = models.DateTimeField('date submitted',default=now)
+    submit_time = models.DateTimeField('date submitted', default=now)
     objects = models.Manager()
+
+
+class Update_Inspection(models.Model):
+    REFERENCE_CHOICES = (
+        ('Case Management & Investigation', 'Case Management & Investigation'),
+        ('Feedback and Appeal', 'Feedback and Appeal'),
+        ('Incident Reporting', 'Incident Reporting'),
+        ('Inspection & Engagement', 'Inspection & Engagement'),
+        ('Monitoring and Surveillance', 'Monitoring and Surveillance')
+    )
+    Inspection_Category = models.CharField(max_length=100)
+    Inspection_Type = models.CharField(max_length=100)
+    Reference = models.CharField(max_length=100, choices=REFERENCE_CHOICES)
+    Reference_No = models.CharField(max_length=100)
+    Arrival_Date = models.DateTimeField(default=now)
+    Arrival_Time = models.DateTimeField(default=now)
+    Workplace_No = models.CharField(max_length=100)
+    objects = models.Manager()
+
 
 class Findings(models.Model):
 
     # Section (A) - 1: Observation of Workplace
     SECTIONA_CHOICES = (
-        ('Section(A) - 1')
+        ('Section(A) - 1', 'Section(A) - 1')
     )
-    Section_A = models.CharField(max_length=20000)
-    File_A = models.FileField(True)
-    Document_Name_A = models.CharField(max_length=100)
-    Document_type_A = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    Section_of_Group_A = models.CharsField(max_length=20, choices=SECTIONA_CHOICES)
-    Description_A = models.CharField(max_length=2000)
+    Section_A = models.CharField(max_length=255)
+    Document_Name = models.CharField(max_length=255)
+    Document_type = models.CharField(max_length=255, choices=TYPE_CHOICES)
+    Section_of_Group = models.CharsField(
+        max_length=20, choices=SECTIONA_CHOICES)
+    Description_A = models.CharField(max_length=255)
+    objects = models.Manager()
 
-    # Section (B) - 1: Observation of Equipment/Machinery/Process
-    SECTIONB_CHOICES = (
-        ('Section(B) - 1')
-    )
-    Section_B = models.CharField(max_length=20000)
-    File_B = models.FileField(True)
-    Document_Name_B = models.CharField(max_length=100)
-    Document_type_B = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    Section_of_Group_B = models.CharsField(max_length=20, choices=SECTIONB_CHOICES)
-    Description_B = models.CharField(max_length=2000)
-
-    # Section (C) - 1: Background
-    SECTIONC_CHOICES = (
-        ('Section(C) - 1')
-    )
-    Section_C = models.CharField(max_length=20000)
-    File_C = models.FileField(True)
-    Document_Name_C = models.CharField(max_length=100)
-    Document_type_C = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    Section_of_Group_C = models.CharsField(max_length=20, choices=SECTIONC_CHOICES)
-    Description_C = models.CharField(max_length=2000)
-
-    # Section (D) - 1: Measures to be taken
-    SECTIOND_CHOICES = (
-        ('Section(D) - 1')
-    )
-    Section_D = models.CharField(max_length=20000)
-    File_D = models.FileField(True)
-    Document_Name_D = models.CharField(max_length=100)
-    Document_type_D = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    Section_of_Group_D = models.CharsField(max_length=20, choices=SECTIOND_CHOICES)
-    Description_D = models.CharField(max_length=2000)
 
 class Risk_Assessment(models.Model):
     RMI_CHOICES = (
-        ('Basic')
-        ('Good')
-        ('Not Applicable')
-        ('Not Assessed')
-        ('Unsatisfactory')
+        ('Basic', 'Basic'),
+        ('Good', 'Good'),
+        ('Not Applicable', 'Not Applicable'),
+        ('Not Assessed', 'Not Assessed'),
+        ('Unsatisfactory', 'Unsatisfactory')
     )
+    Response = models.CharField(max_length=20, choices=RMI_CHOICES)
+    Question = models.CharField(max_length=255)
+    Description = models.CharField(max_length=255)
+    objects = models.Manager()
 
 
-    RMI = models.CharField(max_length=20, choices=RMI_CHOICES)
+class Warnings(models.Model):
+    Warning_CHOICES = (
+        ('Composition Fine', 'Composition Fine'),
+        ('Warning', 'Warning'),
+        ('Notice', 'Notice')
+    )
+    proposed_enforcement_action = models.CharField(
+        max_length=20, choices=Warning_CHOICES)
+    Act = models.CharField(max_length=255)
+    Law = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    objects = models.Manager()
 
-    #Add supporting documents
-    File = models.FileField(True)
-    Document_Name = models.CharField(max_length=100)
-    Document_Type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    Questionnaire_Name = models.CharField(max_length=50)
-    Question_No = models.IntegerField(True)
-    Description = models.CharField(max_length=2000)
 
-class Enforcement(models.Model):
-    
+class SWO(models.Model):
+    justification = models.CharField(max_length=255)
+    offenderDetails = models.CharField(max_length=255)
+    objects = models.Manager()
+
+
+class ApprovalAction(models.Model):
+    Decision_CHOICES = (
+        ('Support', 'Support'),
+        ('Reject', 'Reject')
+    )
+    decision = models.CharField(max_length=255, choices=Decision_CHOICES)
+    remarks = models.CharField(max_length=255)
+    objects = models.Manager()
+
+
+class ApproveOfficer(models.Model):
+    Decision_CHOICES = (
+        ('Approve', 'Approve'),
+        ('Reassign', 'Reassign')
+    )
+    decision = models.CharField(max_length=255, choices=Decision_CHOICES)
+    objects = models.Manager()

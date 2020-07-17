@@ -3,54 +3,59 @@
   "StartAt": "Create Inspection",
   "States": {
     "Create Inspection": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
-      "Parameters": {
-        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
-        "Payload": {
-          "Input.$": "$",
-          "TaskToken.$": "$$.Task.Token"
-        }
-      },
-      "Next": "Update Inspection"
-    },
-    "Update Inspection": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.value",
-          "NumericEquals": 1,
-          "Next": "Reassign Update Inspection"
-        },
-        {
-          "Variable": "$.value",
-          "NumericEquals": 2,
-          "Next": "Parallel"
-        }
-      ],
-      "Default": "Reassign Update Inspection"
-    },
-    "Reassign Update Inspection": {
       "Type": "Pass",
-      "Next": "Update Inspection"
+      "Next": "Update Inspection Tasks"
     },
-    "Parallel": {
+    "Update Inspection Tasks": {
       "Type": "Parallel",
       "Branches": [
         {
-          "StartAt": "Findings",
+          "StartAt": "Update Inspection Details",
           "States": {
-            "Findings": {
-              "Type": "Pass",
+            "Update Inspection Details": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:UpdateInspectionDetails",
+                "Input": {
+                  "StatePayload": "Hello from Step Functions!",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
               "End": true
             }
           }
         },
         {
-          "StartAt": "Risk Assessment",
+          "StartAt": "Findings",
           "States": {
-            "Risk Assessment": {
-              "Type": "Pass",
+            "Findings": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
+                "Input": {
+                  "StatePayload": "Hello from Step Functions!",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Questionaire",
+          "States": {
+            "Questionaire": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Questionaire",
+                "Input": {
+                  "StatePayload": "Hello from Step Functions!",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
               "End": true
             }
           }
@@ -59,118 +64,74 @@
           "StartAt": "Enforcement Page",
           "States": {
             "Enforcement Page": {
-              "Type": "Pass",
+              "Type": "Task",
+              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Parameters": {
+                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Enforcement",
+                "Input": {
+                  "StatePayload": "Hello from Step Functions!",
+                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
+                }
+              },
               "End": true
             }
           }
         }
       ],
-      "Next": "Send for Vetting/Approval"
+      "Next": "Update Inspection"
     },
-    "Send for Vetting/Approval": {
+    "Update Inspection": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Parameters": {
-        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:steps",
         "Payload": {
           "Input.$": "$",
           "TaskToken.$": "$$.Task.Token"
         }
       },
-      "Next": "Vetting/Approval"
+      "Next": "Vetting/Approval Choices"
     },
-    "Vetting/Approval": {
+    "Vetting/Approval Choices": {
       "Type": "Choice",
       "Choices": [
         {
           "Variable": "$.value",
-          "NumericEquals": 1,
-          "Next": "Reassign Send for Vetting/Approval"
+          "StringEquals": "Approve",
+          "Next": "Vetting/Approval"
         },
         {
           "Variable": "$.value",
-          "NumericEquals": 2,
-          "Next": "Officer Action"
-        }
-      ],
-      "Default": "Reassign Send for Vetting/Approval"
-    },
-    "Officer Action": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
-      "Parameters": {
-        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
-        "Payload": {
-          "Input.$": "$",
-          "TaskToken.$": "$$.Task.Token"
-        }
-      },
-      "Next": "Vetting/Approval Actions"
-    },
-    "Reassign Send for Vetting/Approval": {
-      "Type": "Pass",
-      "Next": "Vetting/Approval"
-    },
-    "Vetting/Approval Actions": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.value",
-          "NumericEquals": 1,
-          "Next": "Reassign Vetting/Approval Actions"
+          "StringEquals": "Approve",
+          "Next": "Reassign"
         },
         {
           "Variable": "$.value",
-          "NumericEquals": 2,
-          "Next": "Officer Approve"
-        },
-        {
-          "Variable": "$.value",
-          "NumericEquals": 3,
+          "StringEquals": "Clarifications",
           "Next": "Update Inspection"
         }
       ],
-      "Default": "Reassign Vetting/Approval Actions"
+      "Default": "Vetting/Approval"
     },
-    "Reassign Vetting/Approval Actions": {
+    "Reassign": {
       "Type": "Pass",
-      "Next": "Vetting/Approval Actions"
+      "Next": "Vetting/Approval Choices"
     },
-    "Officer Approve": {
+    "Vetting/Approval": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Parameters": {
-        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:steps",
         "Payload": {
           "Input.$": "$",
           "TaskToken.$": "$$.Task.Token"
         }
       },
-      "Next": "Print CF/NNC Letter"
-    },
-    "Print CF/NNC Letter": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.value",
-          "NumericEquals": 1,
-          "Next": "Reassign Print CF/NNC Letter"
-        },
-        {
-          "Variable": "$.value",
-          "NumericEquals": 2,
-          "Next": "Print Contravention Letter"
-        }
-      ],
-      "Default": "Reassign Print CF/NNC Letter"
-    },
-    "Reassign Print CF/NNC Letter": {
-      "Type": "Pass",
-      "Next": "Print CF/NNC Letter"
+      "Next": "Print Contravention Letter"
     },
     "Print Contravention Letter": {
       "Type": "Pass",
       "End": true
     }
   }
-} 
+}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .forms import SubmissionForm
-from .models import Submission
+from .forms import *
+from .models import *
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from django.utils.timezone import now
@@ -9,14 +9,14 @@ import json
 import boto3
 
 state_machine_arn="arn:aws:states:ap-southeast-1:658793872383:stateMachine:Update_Inspection"
-workflow_execution_role = "arn:aws:iam::658793872383:role/service-role/StepFunctions-Update_Inspection-role-08672079"
+workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-52e618a7"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
 # helper functions
 def submit_approval(id,status, message):
     # get token from dynamo db 
-    task_token = dynamodb.get_item(TableName='Update_Inspection', Key={
+    task_token = dynamodb.get_item(TableName='steps', Key={
         'Key': {'S': id}})['Item']['task_token']['S']
     print("-----------------------------------------")
     print('Key', id,'message' ,message)
@@ -54,14 +54,21 @@ def get_execution_history(execution_arn):
 # Create your views here.
 @never_cache
 def index(request):
-    the_form = SubmissionForm(initial={
+    inbox = StepStatusForm.objects.all()
+    context = {'inbox':inbox}
+    return render(request,'index.html',context)
+
+
+@never_cache
+def CreateInspection(request):
+    StepStatusForm = StepStatusForm(initial={
         'state_machine': state_machine_arn,
         'execution_name': "None"
     })
-    inbox = Submission.objects.all()
-    context = {'the_form':the_form,'inbox': inbox}
-    return render(request,'index.html',context)
-
+    inbox = Create_Inspection.objects.all()
+    update_InspectionForm = Update_InspectionForm()
+    context = {'create_InspectionForm':create_InspectionForm}
+    return render(request,'createInspection.html',context)
 
 @never_cache
 def get_task(request,id):
@@ -72,56 +79,11 @@ def get_task(request,id):
     context = {'state_form':the_form,'latest_status':latest_status}
     return render(request,'submit.html',context)
 
-@never_cache
-@require_POST
-def start_execution(request):
-    the_form = SubmissionForm(request.POST)
-    if the_form.is_valid():
-        data = request.POST.dict()
-        title= data['title']
-        execution_arn = start_steps(title,data['comment'])
-        the_form.save()
-        the_task = Submission.objects.get(title=title)
-        the_task.execution_name = execution_arn
-        the_task.save()
-    return redirect('/')
 
-@never_cache
-@require_POST
-def submit(request):
-    data = request.POST.dict()
-    title = data['title']
-    the_task = Submission.objects.get(title=title)
-    the_form = SubmissionForm(request.POST, instance=the_task)
-    status = data['choice']
-    if the_form.is_valid():
-        comment = data['comment']
-        the_form.save()
-        submit_approval(title,status,comment)
-    return redirect('/')
-
-@never_cache
-@require_POST
-def resume(request):
-    data = request.POST.dict()
-    id = data['id']
-    inputs = json.loads(data['inputs'])
-    inputs['mode']='Skip'
-    state = data['state']
-    definition = sfn.describe_state_machine(stateMachineArn=state_machine_arn)['definition']
-    definition= json.loads(definition)
-    definition["States"]["Mode"]["Default"] = state
-    definition = json.dumps(definition)
-    response = sfn.create_state_machine(
-        name="resume{}".format(str(uuid.uuid4())), definition=definition, roleArn=workflow_execution_role)
-    execution_response = sfn.start_execution(
-        stateMachineArn=response['stateMachineArn'],
-        input=json.dumps(inputs)
-    )
-    the_task = Submission.objects.get(title=id)
-    the_task.state_machine = response['stateMachineArn']
-    the_task.current_status = state
-    the_task.execution_name = execution_response['executionArn']
-    the_task.save()
-    return redirect('/')
-
+# 1) create inspection -> step function triggered
+# 2) updateinspection -> Update_Inspection details -> send task success after getting task token via id+inspection_detail
+# 3) updateinspection -> findings -> send task success after getting task token via id+Findings
+# 4) updateinspection -> enforcement -> send task success after getting task token via id+enforcement
+# 5) updateinspection -> questionaire -> send task success after getting task token via id+question
+# 6)updateinspection -> send task success with the choices approve/Reassign/Clarification to go to approval stage/ update inspection again
+# 7) approval stage -> approve /reject
