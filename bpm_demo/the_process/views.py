@@ -8,18 +8,18 @@ import uuid
 import json
 import boto3
 
-state_machine_arn="arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
-workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-3d33a29f"
+state_machine_arn="arn:aws:states:ap-southeast-1:658793872383:stateMachine:Update_Inspection"
+workflow_execution_role = "arn:aws:iam::658793872383:role/service-role/StepFunctions-Update_Inspection-role-08672079"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
 # helper functions
 def submit_approval(id,status, message):
     # get token from dynamo db 
-    task_token = dynamodb.get_item(TableName='steps', Key={
-        'id': {'S': id}})['Item']['task_token']['S']
+    task_token = dynamodb.get_item(TableName='Update_Inspection', Key={
+        'Key': {'S': id}})['Item']['task_token']['S']
     print("-----------------------------------------")
-    print('id',id,'message' ,message)
+    print('Key', id,'message' ,message)
     print(task_token)
     print("-----------------------------------------")
     response = sfn.send_task_success(

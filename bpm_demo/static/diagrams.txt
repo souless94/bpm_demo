@@ -1,0 +1,176 @@
+{
+  "Comment": "WorkFlow for Update inspection",
+  "StartAt": "Create Inspection",
+  "States": {
+    "Create Inspection": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Update Inspection"
+    },
+    "Update Inspection": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.value",
+          "NumericEquals": 1,
+          "Next": "Reassign Update Inspection"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 2,
+          "Next": "Parallel"
+        }
+      ],
+      "Default": "Reassign Update Inspection"
+    },
+    "Reassign Update Inspection": {
+      "Type": "Pass",
+      "Next": "Update Inspection"
+    },
+    "Parallel": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "Findings",
+          "States": {
+            "Findings": {
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Risk Assessment",
+          "States": {
+            "Risk Assessment": {
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Enforcement Page",
+          "States": {
+            "Enforcement Page": {
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "Send for Vetting/Approval"
+    },
+    "Send for Vetting/Approval": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Vetting/Approval"
+    },
+    "Vetting/Approval": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.value",
+          "NumericEquals": 1,
+          "Next": "Reassign Send for Vetting/Approval"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 2,
+          "Next": "Officer Action"
+        }
+      ],
+      "Default": "Reassign Send for Vetting/Approval"
+    },
+    "Officer Action": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Vetting/Approval Actions"
+    },
+    "Reassign Send for Vetting/Approval": {
+      "Type": "Pass",
+      "Next": "Vetting/Approval"
+    },
+    "Vetting/Approval Actions": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.value",
+          "NumericEquals": 1,
+          "Next": "Reassign Vetting/Approval Actions"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 2,
+          "Next": "Officer Approve"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 3,
+          "Next": "Update Inspection"
+        }
+      ],
+      "Default": "Reassign Vetting/Approval Actions"
+    },
+    "Reassign Vetting/Approval Actions": {
+      "Type": "Pass",
+      "Next": "Vetting/Approval Actions"
+    },
+    "Officer Approve": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:658793872383:function:updateInspection",
+        "Payload": {
+          "Input.$": "$",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "Next": "Print CF/NNC Letter"
+    },
+    "Print CF/NNC Letter": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.value",
+          "NumericEquals": 1,
+          "Next": "Reassign Print CF/NNC Letter"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 2,
+          "Next": "Print Contravention Letter"
+        }
+      ],
+      "Default": "Reassign Print CF/NNC Letter"
+    },
+    "Reassign Print CF/NNC Letter": {
+      "Type": "Pass",
+      "Next": "Print CF/NNC Letter"
+    },
+    "Print Contravention Letter": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+} 
