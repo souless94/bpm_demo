@@ -56,7 +56,7 @@ def parseFailureHistory(failedExecutionArn):
     try:
         failedEvents[0]['executionFailedEventDetails']
     except:
-        raise ('Execution did not fail')
+        return 'Execution did not fail'
     '''
     If we have a 'States.Runtime' error (for example if a task state in our state 
     machine attempts to execute a lambda function in a different region than the 
@@ -156,17 +156,17 @@ def attachGoToState(failedStateName, stateMachineArn):
     return response
 
 
-if __name__ == '__main__':
-    '''
-    Main
-    Run as: 
-    python gotostate.py --failedExecutionArn '<Failed_Execution_Arn>'"
-    '''
-    parser = argparse.ArgumentParser(description='Execution Arn of the failed state machine.')
-    parser.add_argument('--failedExecutionArn', dest='failedExecutionArn', type=str)
-    args = parser.parse_args()
-    failedSMInfo = parseFailureHistory(args.failedExecutionArn)
-    smArn = smArnFromExecutionArn(args.failedExecutionArn)
-    newMachine = attachGoToState(failedSMInfo[0], smArn)
-    print("New State Machine Arn: {}".format(newMachine['stateMachineArn']))
-    print("Execution had failed at state: {} with Input: {}".format(failedSMInfo[0], failedSMInfo[1]))
+# if __name__ == '__main__':
+#     '''
+#     Main
+#     Run as: 
+#     python gotostate.py --failedExecutionArn '<Failed_Execution_Arn>'"
+#     '''
+#     parser = argparse.ArgumentParser(description='Execution Arn of the failed state machine.')
+#     parser.add_argument('--failedExecutionArn', dest='failedExecutionArn', type=str)
+#     args = parser.parse_args()
+#     failedSMInfo = parseFailureHistory(args.failedExecutionArn)
+#     smArn = smArnFromExecutionArn(args.failedExecutionArn)
+#     newMachine = attachGoToState(failedSMInfo[0], smArn)
+#     print("New State Machine Arn: {}".format(newMachine['stateMachineArn']))
+#     print("Execution had failed at state: {} with Input: {}".format(failedSMInfo[0], failedSMInfo[1]))

@@ -11,11 +11,7 @@
     <div class="container col-md-6 align-center justify-content-center">
         <form class="form" method="post" action="/approve/">
             {% csrf_token %}
-            {{ state_form |crispy }}
-            <select id="cars" name="choice">
-              <option value="Continue">Continue</option>
-              <option value="Reassign">Reassign</option>
-            </select>
+            {{ create_InspectionForm |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>
         </form>
     </div>

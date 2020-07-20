@@ -4,11 +4,7 @@ from django.utils.timezone import now
 import uuid
 # Create your models here.
 
-TYPE_CHOICES = (
-    ('Documents and Photos', 'Documents and Photos'),
-    ('Photos', 'Photos'),
-    ('Supporting Documents', 'Supporting Documents')
-)
+
 
 # Model logic
 # 1) track current state from the step functions using execution history
@@ -38,14 +34,16 @@ TYPE_CHOICES = (
 # 2) update inspection -> submit form and tag to workflow id and check if all is finished before submission
 # 3) approval stage ->  approve /reject
 
+TYPE_CHOICES = (
+    ('Documents and Photos', 'Documents and Photos'),
+    ('Photos', 'Photos'),
+    ('Supporting Documents', 'Supporting Documents')
+)
+
 class StepStatus(models.Model):
     title = models.CharField(max_length=255)
     state_machine = models.CharField(max_length=255)
     execution_arn = models.CharField(max_length=255)
-    main = models.CharField(max_length=255)
-    current_status = models.CharField(max_length=255)
-    assignee = models.CharField(max_length=255)
-    submit_time = models.DateTimeField('date submitted', default=now)
     objects = models.Manager()
 
 
@@ -71,12 +69,12 @@ class Findings(models.Model):
 
     # Section (A) - 1: Observation of Workplace
     SECTIONA_CHOICES = (
-        ('Section(A) - 1', 'Section(A) - 1')
+        ('Section(A) - 1', 'Section(A) - 1'),
     )
     Section_A = models.CharField(max_length=255)
     Document_Name = models.CharField(max_length=255)
     Document_type = models.CharField(max_length=255, choices=TYPE_CHOICES)
-    Section_of_Group = models.CharsField(
+    Section_of_Group = models.CharField(
         max_length=20, choices=SECTIONA_CHOICES)
     Description_A = models.CharField(max_length=255)
     objects = models.Manager()
