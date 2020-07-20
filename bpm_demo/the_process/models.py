@@ -38,9 +38,6 @@ TYPE_CHOICES = (
 # 2) update inspection -> submit form and tag to workflow id and check if all is finished before submission
 # 3) approval stage ->  approve /reject
 
-
-
-
 class StepStatus(models.Model):
     title = models.CharField(max_length=255)
     state_machine = models.CharField(max_length=255)

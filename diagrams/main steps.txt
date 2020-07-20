@@ -17,10 +17,7 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:UpdateInspectionDetails",
-                "Input": {
-                  "Input.$": "$",
-                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
-                }
+                "Input.$": "$"
               },
               "End": true
             }
@@ -34,10 +31,7 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
-                "Input": {
-                  "Input.$": "$",
-                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
-                }
+                 "Input.$": "$"
               },
               "End": true
             }
@@ -51,10 +45,7 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Questionaire",
-                "Input": {
-                  "Input.$": "$",
-                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
-                }
+                 "Input.$": "$"
               },
               "End": true
             }
@@ -68,10 +59,7 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Enforcement",
-                "Input": {
-                  "Input.$": "$",
-                  "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
-                }
+                "Input.$": "$"
               },
               "End": true
             }
