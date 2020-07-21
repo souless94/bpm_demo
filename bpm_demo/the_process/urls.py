@@ -5,6 +5,7 @@ app_name = 'the_process'
 
 urlpatterns = [
     path('',views.index ),
+    path('createInspectionPage/',views.CreateInspectionPage),
     path('createInspection/',views.CreateInspection)
     # path('updateInspection/', views.updateInspection)
     # path('submit/',views.start_execution),

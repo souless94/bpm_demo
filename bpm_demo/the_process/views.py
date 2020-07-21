@@ -66,7 +66,6 @@ def index(request):
 
 @never_cache
 def CreateInspectionPage(request):
-    inbox = Update_Inspection.objects.all()
     update_InspectionForm = Update_InspectionForm()
     context = {'create_InspectionForm': update_InspectionForm}
     return render(request, 'createInspection.html', context)
@@ -74,10 +73,13 @@ def CreateInspectionPage(request):
 @never_cache
 @require_POST
 def CreateInspection(request):
-    inbox = Update_Inspection.objects.all()
-    update_InspectionForm = Update_InspectionForm()
-    context = {'create_InspectionForm': update_InspectionForm}
-    return render(request, 'createInspection.html', context)
+    update_InspectionForm = Update_InspectionForm(request.POST)
+    if update_InspectionForm.is_valid():
+        # create inspection here and update stepstatus
+        stepStatus = StepStatus(title='sampleWorkflow',state_machine=state_machine_arn,execution_arn='execution_arn')
+        stepStatus.save()
+        update_InspectionForm.save()
+    return redirect('/')
 
 
 @never_cache

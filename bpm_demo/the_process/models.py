@@ -44,6 +44,7 @@ class StepStatus(models.Model):
     title = models.CharField(max_length=255)
     state_machine = models.CharField(max_length=255)
     execution_arn = models.CharField(max_length=255)
+    current_status = models.CharField(max_length=255,default='Not Assigned')
     objects = models.Manager()
 
 

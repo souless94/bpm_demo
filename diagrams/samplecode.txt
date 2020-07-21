@@ -1,0 +1,1 @@
+<!-- <td> <a href="{% url 'the_process:get_task' task.id %}">Get Task</a></td> -->

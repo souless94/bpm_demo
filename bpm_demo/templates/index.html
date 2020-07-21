@@ -12,8 +12,10 @@
                 <thead>
                     <tr>
                         <th scope="col">TaskId</th>
-                        <th scope="col">assignee</th>
-                        <th scope="col">state</th>
+                        <th scope="col">title</th>
+                        <th scope="col">stateMachineArn</th>
+                        <th scope="col">executionArn</th>
+                        <th scope="col">status</th>
                         <th scope="col">view task</th>
                  </tr>
                 </thead>
@@ -21,16 +23,10 @@
                     {% for task in inbox %}
                     <tr>
                         <th scope="row"> {{ task.id }}</th>
-                    {% if task.current_status %}
-                    <td>{{ task.assignee }}</td>
+                    <td>{{ task.title }}</td>
+                    <td scope="col">{{ task.state_machine }}</td>
+                    <td scope="col">{{ task.execution_arn }}</td>
                     <td scope="col">{{ task.current_status }}</td>
-                    <td> <a href="{% url 'the_process:get_task' task.id %}">View Task</a></td>
-                    {% else %}
-                    <td>null</td>
-                    <td scope="col">Not started</td>
-                    <td> <a href="{% url 'the_process:get_task' task.id %}">Get Task</a></td>
-                    
-                    {% endif %}
                   </tr>
                     {% endfor %}
                 </tbody>
@@ -45,7 +41,7 @@
         </div>
 <br>
 
-<a class="btn btn-primary" href="/createInspection/">Create Inspection</a>
+<a class="btn btn-primary" href="/createInspectionPage/">Create Inspection</a>
 
 {% endblock %}
 
