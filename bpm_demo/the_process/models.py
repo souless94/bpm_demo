@@ -44,7 +44,8 @@ class StepStatus(models.Model):
     title = models.CharField(max_length=255)
     state_machine = models.CharField(max_length=255)
     execution_arn = models.CharField(max_length=255)
-    current_status = models.CharField(max_length=255,default='Not Assigned')
+    current_status = models.CharField(max_length=255,default='None')
+    assignee = models.CharField(max_length=255,default='Not Assigned')
     objects = models.Manager()
 
 
@@ -56,6 +57,7 @@ class Update_Inspection(models.Model):
         ('Inspection & Engagement', 'Inspection & Engagement'),
         ('Monitoring and Surveillance', 'Monitoring and Surveillance')
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     Inspection_Category = models.CharField(max_length=100)
     Inspection_Type = models.CharField(max_length=100)
     Reference = models.CharField(max_length=100, choices=REFERENCE_CHOICES)
@@ -72,6 +74,7 @@ class Findings(models.Model):
     SECTIONA_CHOICES = (
         ('Section(A) - 1', 'Section(A) - 1'),
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     Section_A = models.CharField(max_length=255)
     Document_Name = models.CharField(max_length=255)
     Document_type = models.CharField(max_length=255, choices=TYPE_CHOICES)
@@ -89,6 +92,7 @@ class Risk_Assessment(models.Model):
         ('Not Assessed', 'Not Assessed'),
         ('Unsatisfactory', 'Unsatisfactory')
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     Response = models.CharField(max_length=20, choices=RMI_CHOICES)
     Question = models.CharField(max_length=255)
     Description = models.CharField(max_length=255)
@@ -101,6 +105,7 @@ class Warnings(models.Model):
         ('Warning', 'Warning'),
         ('Notice', 'Notice')
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     proposed_enforcement_action = models.CharField(
         max_length=20, choices=Warning_CHOICES)
     Act = models.CharField(max_length=255)
@@ -110,6 +115,7 @@ class Warnings(models.Model):
 
 
 class SWO(models.Model):
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     justification = models.CharField(max_length=255)
     offenderDetails = models.CharField(max_length=255)
     objects = models.Manager()
@@ -120,6 +126,7 @@ class ApprovalAction(models.Model):
         ('Support', 'Support'),
         ('Reject', 'Reject')
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     decision = models.CharField(max_length=255, choices=Decision_CHOICES)
     remarks = models.CharField(max_length=255)
     objects = models.Manager()
@@ -130,5 +137,6 @@ class ApproveOfficer(models.Model):
         ('Approve', 'Approve'),
         ('Reassign', 'Reassign')
     )
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     decision = models.CharField(max_length=255, choices=Decision_CHOICES)
     objects = models.Manager()

@@ -7,10 +7,11 @@ from django.views.decorators.cache import never_cache
 from django.utils.timezone import now
 import uuid
 import json
+from django.core.serializers.json import DjangoJSONEncoder
 import boto3
 
-state_machine_arn = "arn:aws:states:ap-southeast-1:658793872383:stateMachine:Update_Inspection"
-workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-52e618a7"
+state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
+workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-ce3aeb8f"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
@@ -33,10 +34,10 @@ def submit_approval(id, status, message):
     return redirect('/')
 
 
-def start_steps(id, comment):
+def start_steps(id):
     response = sfn.start_execution(
         stateMachineArn=state_machine_arn,
-        input=json.dumps({'id': id, 'comments': comment, 'mode': 'Normal'})
+        input=json.dumps({'id': id})
     )
     return response['executionArn']
 
@@ -45,11 +46,7 @@ def get_execution_history(execution_arn):
     response = sfn.get_execution_history(executionArn=execution_arn)
     reply = parseFailureHistory(execution_arn)
     if (reply == 'Execution did not fail'):
-        result = response.get('events')
-        result = list(map(lambda d: d.get('stateEnteredEventDetails'), result))
-        result = list(filter(lambda d: d != None, result))
-        result = list(map(lambda d: d.get('name'), result))
-        return result[-1]
+        return json.dumps(response,cls=DjangoJSONEncoder)
     else:
         return reply
 
@@ -75,21 +72,76 @@ def CreateInspectionPage(request):
 def CreateInspection(request):
     update_InspectionForm = Update_InspectionForm(request.POST)
     if update_InspectionForm.is_valid():
+        print('-------------ok------------------')
         # create inspection here and update stepstatus
-        stepStatus = StepStatus(title='sampleWorkflow',state_machine=state_machine_arn,execution_arn='execution_arn')
+        stepStatus = StepStatus(title='sampleWorkflow',state_machine=state_machine_arn,execution_arn=execution_arn)
         stepStatus.save()
+        # launch stepfunction
+        execution_arn = start_steps(str(stepStatus.id))
+        update_Inspection = update_InspectionForm.save(commit=False)
+        update_Inspection.stepStatus = stepStatus
+        update_Inspection.save()
         update_InspectionForm.save()
     return redirect('/')
 
-
+# update inspection
 @never_cache
 def get_task(request, id):
-    the_task = Submission.objects.get(pk=id)
-    the_form = SubmissionForm(instance=the_task)
-    execution_arn = the_task.execution_name
+    stepStatus = StepStatus.objects.get(pk=id)
+    stepStatus.current_status = 'Update Inspection'
+    stepStatus.assignee = 'OSHD1'
+    stepStatus.save()
+    update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
+    the_form = Update_InspectionForm(instance=update_Inspection)
+    latest_status = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    context = { 'stateId': id, 'create_InspectionForm': the_form, 'latest_status': latest_status , 'definition': definition}
+    return render(request, 'updateInspection.html', context)
+#####################################################################
+
+# finding
+@never_cache
+def get_finding(request, id):
+    stepStatus = StepStatus.objects.get(pk=id)
+    the_form = FindingsForm(initial={"stepStatus": stepStatus})
     latest_status = get_execution_history(execution_arn)
-    context = {'state_form': the_form, 'latest_status': latest_status}
-    return render(request, 'index.html', context)
+    # definition = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    return render(request, 'Findings.html', context)
+
+#####################################################################
+
+# questionaire
+@never_cache
+def get_questionaire(request, id):
+    stepStatus = StepStatus.objects.get(pk=id)
+    the_form = Risk_AssessmentForm(initial={"stepStatus": stepStatus})
+    latest_status = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    return render(request, 'riskAssessment.html', context)
+    
+#####################################################################
+
+# enforcement
+@never_cache
+def get_enforcement(request, id):
+    stepStatus = StepStatus.objects.get(pk=id)
+    the_form = FindingsForm(initial={"stepStatus": stepStatus})
+    latest_status = """get_execution_history(execution_arn)"""
+    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    return render(request, 'Findings.html', context)
+#####################################################################
+
+
+# vet approve
+@never_cache
+def get_vetApproveAction(request, id):
+    stepStatus = StepStatus.objects.get(pk=id)
+    the_form = FindingsForm(initial={"stepStatus": stepStatus})
+    latest_status = """get_execution_history(execution_arn)"""
+    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    return render(request, 'Findings.html', context)
+#####################################################################
 
 
 # 1) create inspection -> step function triggered

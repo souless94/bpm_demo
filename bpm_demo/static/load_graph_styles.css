@@ -1,0 +1,40 @@
+.graph-legend ul {
+  list-style-type: none;
+  padding: 10px;
+  padding-left: 0;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  background: transparent;
+}
+
+.graph-legend li {
+  margin-left: 10px;
+  display: inline-block;
+}
+
+.graph-legend li > div {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+.graph-legend .success {
+  background-color: #2bd62e;
+}
+
+.graph-legend .failed {
+  background-color: #de322f;
+}
+
+.graph-legend .cancelled {
+  background-color: #dddddd;
+}
+
+.graph-legend .in-progress {
+  background-color: #53c9ed;
+}
+
+.graph-legend .caught-error {
+  background-color: #ffa500;
+}

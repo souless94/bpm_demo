@@ -12,6 +12,7 @@ class Update_InspectionForm(ModelForm):
     class Meta:
         model = Update_Inspection
         fields = '__all__'
+        exclude= ['stepStatus',]
 
 
 class FindingsForm(ModelForm):

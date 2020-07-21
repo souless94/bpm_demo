@@ -16,6 +16,7 @@
                         <th scope="col">stateMachineArn</th>
                         <th scope="col">executionArn</th>
                         <th scope="col">status</th>
+                        <th scope="col">assignee</th>
                         <th scope="col">view task</th>
                  </tr>
                 </thead>
@@ -27,6 +28,8 @@
                     <td scope="col">{{ task.state_machine }}</td>
                     <td scope="col">{{ task.execution_arn }}</td>
                     <td scope="col">{{ task.current_status }}</td>
+                    <td scope="col">{{ task.assignee }}</td>
+                <td> <a href="{% url 'the_process:update_inspection' task.id %}">Get Task</a></td>
                   </tr>
                     {% endfor %}
                 </tbody>
