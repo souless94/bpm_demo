@@ -32,7 +32,6 @@ def resume_steps(id):
         output=json.dumps({'id': id})
     )
     print("sent approval", response)
-    return redirect('/')
 
 
 def start_steps(id):
@@ -43,7 +42,7 @@ def start_steps(id):
     return response['executionArn']
 
 def get_current_status(execution_arn):
-    response = sfn.get_execution_history(executionArn=execution_arn,reverseOrder=True)
+    response = sfn.get_execution_history(executionArn=execution_arn)
     reply = parseFailureHistory(execution_arn)
     if (reply == 'Execution did not fail'):
         result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
@@ -53,7 +52,10 @@ def get_current_status(execution_arn):
             result = result[-1]['stateEnteredEventDetails']['name']
             return result
         else:
-            return result
+            result = list(map(lambda d: d.get('stateEnteredEventDetails'), result))
+            result = list(filter(lambda d: d != None, result))
+            result = list(map(lambda d: d.get('name'), result))
+            return result[-1]
     else:
         return reply
 
