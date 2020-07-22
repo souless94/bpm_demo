@@ -7,10 +7,10 @@ urlpatterns = [
     path('',views.index ),
     path('createInspectionPage/',views.CreateInspectionPage),
     path('createInspection/',views.CreateInspection),
-    # path('updateInspection/', views.updateInspection)
-    # path('submit/',views.start_execution),
     path('update_inspection/<int:id>/',views.get_task,name='update_inspection'),
+    path('updateInspection/',views.updateInspection),
     path('finding/<int:id>/',views.get_finding,name='finding'),
+    path('findings/',views.post_finding),
     path('question/<int:id>/',views.get_questionaire,name='question'),
     path('enforcement/<int:id>/',views.get_enforcement,name='enforcement'),
     path('vet_approve/<int:id>/',views.get_vetApproveAction,name='vet_approve'),

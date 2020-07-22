@@ -18,17 +18,18 @@ dynamodb = boto3.client('dynamodb')
 # helper functions
 
 
-def submit_approval(id, status, message):
+def resume_steps(id):
     # get token from dynamo db
+    print(id)
     task_token = dynamodb.get_item(TableName='steps', Key={
-        'Key': {'S': id}})['Item']['task_token']['S']
+        'id': {'S': id}})['Item']['task_token']['S']
     print("-----------------------------------------")
-    print('Key', id, 'message', message)
+    print('id', id)
     print(task_token)
     print("-----------------------------------------")
     response = sfn.send_task_success(
         taskToken=task_token,
-        output=json.dumps({'id': id, 'status': status, 'message': message})
+        output=json.dumps({'id': id})
     )
     print("sent approval", response)
     return redirect('/')
@@ -41,6 +42,20 @@ def start_steps(id):
     )
     return response['executionArn']
 
+def get_current_status(execution_arn):
+    response = sfn.get_execution_history(executionArn=execution_arn,reverseOrder=True)
+    reply = parseFailureHistory(execution_arn)
+    if (reply == 'Execution did not fail'):
+        result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
+        check = list(map(lambda d: d.get('type'), result))
+        if 'ParallelStateEntered' in check and 'ParallelStateSucceeded' not in check :
+            result = list(filter(lambda d: d.get('type') == 'ParallelStateEntered', result))
+            result = result[-1]['stateEnteredEventDetails']['name']
+            return result
+        else:
+            return result
+    else:
+        return reply
 
 def get_execution_history(execution_arn):
     response = sfn.get_execution_history(executionArn=execution_arn)
@@ -63,40 +78,61 @@ def index(request):
 
 @never_cache
 def CreateInspectionPage(request):
-    update_InspectionForm = Update_InspectionForm()
-    context = {'create_InspectionForm': update_InspectionForm}
+    create_InspectionForm = Create_InspectionForm()
+    context = {'create_InspectionForm': create_InspectionForm}
     return render(request, 'createInspection.html', context)
 
 @never_cache
 @require_POST
 def CreateInspection(request):
-    update_InspectionForm = Update_InspectionForm(request.POST)
-    if update_InspectionForm.is_valid():
-        print('-------------ok------------------')
+    create_InspectionForm = Create_InspectionForm(request.POST)
+    if create_InspectionForm.is_valid():
+        print('-------------valid form------------------')
         # create inspection here and update stepstatus
-        stepStatus = StepStatus(title='sampleWorkflow',state_machine=state_machine_arn,execution_arn=execution_arn)
-        stepStatus.save()
+        stepStatus = StepStatus(title='sampleWorkflow',state_machine=state_machine_arn,execution_arn='none')
         # launch stepfunction
-        execution_arn = start_steps(str(stepStatus.id))
-        update_Inspection = update_InspectionForm.save(commit=False)
-        update_Inspection.stepStatus = stepStatus
-        update_Inspection.save()
-        update_InspectionForm.save()
+        stepStatus.save()
+        print('-------------stepstatus Id '+str(stepStatus.id)+'------------------')
+        stepStatus.execution_arn = start_steps(str(stepStatus.id))
+        stepStatus.save()
+        create_InspectionForm = create_InspectionForm.save(commit=False)
+        create_InspectionForm.stepStatus = stepStatus
+        create_InspectionForm.save()
     return redirect('/')
 
 # update inspection
 @never_cache
 def get_task(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    stepStatus.current_status = 'Update Inspection'
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
     stepStatus.assignee = 'OSHD1'
     stepStatus.save()
     update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
     the_form = Update_InspectionForm(instance=update_Inspection)
-    latest_status = get_execution_history(stepStatus.execution_arn)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
-    context = { 'stateId': id, 'create_InspectionForm': the_form, 'latest_status': latest_status , 'definition': definition}
+    context = { 'stateId': id, 'create_InspectionForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'updateInspection.html', context)
+
+@never_cache
+@require_POST
+def updateInspection(request):
+    update_InspectionForm = Update_InspectionForm(request.POST)
+    if update_InspectionForm.is_valid():
+
+        print('-------------inspection------------------')
+        stateId = request.POST.dict()['stepStatus']
+        # resume stepfunction
+        resume_steps(str(stateId) + '-inspection_details')
+        print('resumed inspection_details')
+        stepStatus = StepStatus.objects.get(pk=stateId)
+        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+        stepStatus.save()
+        update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
+        update_InspectionForm = Update_InspectionForm(request.POST,instance=update_Inspection)
+        update_InspectionForm.save()
+    return redirect('/update_inspection/'+stateId)
+
 #####################################################################
 
 # finding
@@ -104,10 +140,31 @@ def get_task(request, id):
 def get_finding(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
     the_form = FindingsForm(initial={"stepStatus": stepStatus})
-    latest_status = get_execution_history(execution_arn)
+    findings = Findings.objects.filter(stepStatus=stepStatus)
+    if (findings.exists()):
+        findings = Findings.objects.get(stepStatus=stepStatus)
+        the_form = FindingsForm(instance=findings)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     # definition = get_execution_history(execution_arn)
-    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    context = { 'stateId': id, 'finding_form': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'Findings.html', context)
+
+@never_cache
+@require_POST
+def post_finding(request):
+    findingForm = FindingsForm(request.POST)
+    if findingForm.is_valid():
+        print('-------------finding------------------')
+        stateId = request.POST.dict()['stepStatus']
+        # resume stepfunction
+        resume_steps(str(stateId) + '-findings')
+        print('resumed Findings')
+        stepStatus = StepStatus.objects.get(pk =stateId)
+        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+        stepStatus.save()
+        findingForm.save()
+    return redirect('/finding/'+stateId)
 
 #####################################################################
 
