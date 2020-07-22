@@ -2,7 +2,8 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-
+<script type="text/javascript" src="{% static 'load_graph.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'load_graph_styles.css' %}">
 
 <a class="btn btn-primary" href="/">Home</a>
 <hr>
@@ -68,11 +69,36 @@
 <br>
 <h1> Findings </h1>
 <div class="alert alert-primary">
-  <div id="execution response" style="display: none;" >{{latest_status }}</div>
-  </div>
+    <div id="events" style="display: none;" >{{status_diagram }}</div>
+    <div id="definition" style="display: none;" >{{ definition }}</div>
+    </div>
+    <div id="graph-914" class="workflowgraph">
+        <div class="graph-legend">
+            <ul>
+                <li>
+                    <div class="success"></div>
+                    <span>Success</span>
+                </li>
+                <li>
+                    <div class="failed"></div>
+                    <span>Failed</span>
+                </li>
+                <li>
+                    <div class="cancelled"></div>
+                    <span>Cancelled</span>
+                </li>
+                <li>
+                    <div class="in-progress"></div>
+                    <span>In Progress</span>
+                </li>
+                <li>
+                    <div class="caught-error"></div>
+                    <span>Caught Error</span>
+                </li>
+            </ul></div><svg></svg></div>
     
     <div class="container col-md-6 align-center justify-content-center">
-        <form class="form" method="post" action="/approve/">
+        <form class="form" method="post" action="/findings/">
             {% csrf_token %}
             {{ finding_form |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>

@@ -69,7 +69,7 @@
 <br>
 <h1> update inspection </h1>
 <div class="alert alert-primary">
-    <div id="events" style="display: none;" >{{latest_status }}</div>
+    <div id="events" style="display: none;" >{{status_diagram }}</div>
     <div id="definition" style="display: none;" >{{ definition }}</div>
     </div>
     <div id="graph-914" class="workflowgraph">
@@ -99,7 +99,7 @@
     
     
     <div class="container col-md-6 align-center justify-content-center">
-        <form class="form" method="post" action="/createInspection/">
+        <form class="form" method="post" action="/updateInspection/">
             {% csrf_token %}
             {{ create_InspectionForm |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>
