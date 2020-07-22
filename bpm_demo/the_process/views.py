@@ -173,20 +173,66 @@ def post_finding(request):
 def get_questionaire(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
     the_form = Risk_AssessmentForm(initial={"stepStatus": stepStatus})
-    latest_status = get_execution_history(execution_arn)
-    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
+    risk_Assessment = Risk_Assessment.objects.filter(stepStatus=stepStatus)
+    if (risk_Assessment.exists()):
+        risk_Assessment = Risk_Assessment.objects.get(stepStatus=stepStatus)
+        the_form = Risk_AssessmentForm(instance=risk_Assessment)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    # definition = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'RiskAssessmentForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'riskAssessment.html', context)
-    
+
+@never_cache
+@require_POST
+def post_questionaire(request):
+    risk_AssessmentForm = Risk_AssessmentForm(request.POST)
+    if risk_AssessmentForm.is_valid():
+        print('-------------Questionaire------------------')
+        stateId = request.POST.dict()['stepStatus']
+        # resume stepfunction
+        resume_steps(str(stateId) + '-question')
+        print('resumed Questions')
+        stepStatus = StepStatus.objects.get(pk =stateId)
+        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+        stepStatus.save()
+        risk_AssessmentForm.save()
+    return redirect('/question/'+stateId)
+
 #####################################################################
+
 
 # enforcement
 @never_cache
 def get_enforcement(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    the_form = FindingsForm(initial={"stepStatus": stepStatus})
-    latest_status = """get_execution_history(execution_arn)"""
-    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
-    return render(request, 'Findings.html', context)
+    the_form = WarningsForm(initial={"stepStatus": stepStatus})
+    warnings = Warnings.objects.filter(stepStatus=stepStatus)
+    if (warnings.exists()):
+        warnings = Warnings.objects.get(stepStatus=stepStatus)
+        the_form = Risk_AssessmentForm(instance=warnings)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    # definition = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'WarningsForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
+    return render(request, 'Enforcement.html', context)
+
+@never_cache
+@require_POST
+def post_enforcement(request):
+    warningsForm = WarningsForm(request.POST)
+    if warningsForm.is_valid():
+        print('-------------Enforcement------------------')
+        stateId = request.POST.dict()['stepStatus']
+        # resume stepfunction
+        resume_steps(str(stateId) + '-enforcement')
+        print('resumed enforcement')
+        stepStatus = StepStatus.objects.get(pk =stateId)
+        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+        stepStatus.save()
+        warningsForm.save()
+    return redirect('/enforcement/'+stateId)
+
 #####################################################################
 
 
