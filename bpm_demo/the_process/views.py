@@ -10,8 +10,8 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 import boto3
 
-state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
-workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-ce3aeb8f"
+state_machine_arn = "arn:aws:states:ap-southeast-1:658793872383:stateMachine:Main_Steps"
+workflow_execution_role = "arn:aws:iam::658793872383:role/service-role/StepFunctions-Main_Steps-role-b6d9e573"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
