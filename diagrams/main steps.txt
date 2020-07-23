@@ -31,7 +31,7 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
-                 "Input.$": "$"
+                "Input.$": "$"
               },
               "End": true
             }
@@ -45,20 +45,6 @@
               "Resource": "arn:aws:states:::states:startExecution.sync:2",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Questionaire",
-                 "Input.$": "$"
-              },
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "Enforcement Page",
-          "States": {
-            "Enforcement Page": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::states:startExecution.sync:2",
-              "Parameters": {
-                "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Enforcement",
                 "Input.$": "$"
               },
               "End": true
@@ -66,9 +52,9 @@
           }
         }
       ],
-      "Next": "Update Inspection"
+      "Next": "Vet/Approve Action"
     },
-    "Update Inspection": {
+    "Vet/Approve Action": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Parameters": {
@@ -96,7 +82,7 @@
         {
           "Variable": "$.value",
           "StringEquals": "Clarifications",
-          "Next": "Update Inspection"
+          "Next": "Vet/Approve Action"
         }
       ],
       "Default": "Vetting/Approval"
@@ -115,10 +101,15 @@
           "TaskToken.$": "$$.Task.Token"
         }
       },
-      "Next": "Print Contravention Letter"
+      "Next": "Launch enforcements"
     },
-    "Print Contravention Letter": {
-      "Type": "Pass",
+    "Launch enforcements": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Enforcement",
+        "Input.$": "$"
+      },
       "End": true
     }
   }
