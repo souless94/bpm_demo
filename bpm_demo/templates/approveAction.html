@@ -2,20 +2,104 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
+<script type="text/javascript" src="{% static 'load_graph.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'load_graph_styles.css' %}">
 
-<a class="btn btn-primary">Create Inspection</a>
+<a class="btn btn-primary" href="/">Home</a>
+<hr>
+<div class="container col-md-8 centered d-flex">
+    <table class="table table-light table-sm table-bordered table-hover col-md-12">
+        <thead>
+            <tr>
+                <th scope="col">TaskId</th>
+                <th scope="col">title</th>
+         </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {{ stateId }}
+                </td>
+                <td>
+                     <a href="{% url 'the_process:update_inspection' stateId %}">Update Inspection</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ stateId }}
+                </td>
+                <td>
+                   <a href="{% url 'the_process:finding' stateId %}">Findings</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ stateId }}
+                </td>
+                <td>
+                     <a href="{% url 'the_process:question' stateId %}">Questionaire</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ stateId }}
+                </td>
+                <td>
+                   <a href="{% url 'the_process:enforcement' stateId %}">Enforcement</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ stateId }}
+                </td>
+                <td>
+                   <a href="{% url 'the_process:vet_approve' stateId %}">Vet Approve / Action</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <style>
+      .table-bordered td,
+      .table-bordered th {
+          border-color: black !important;
+      }
+
+  </style>
+</div>
+<br>
+<h1> Vet/Approve action </h1>
 <div class="alert alert-primary">
-    Approve Action
-  </div>
-    
+    <div id="events" style="display: none;" >{{status_diagram }}</div>
+    <div id="definition" style="display: none;" >{{ definition }}</div>
+    </div>
+    <div id="graph-914" class="workflowgraph">
+        <div class="graph-legend">
+            <ul>
+                <li>
+                    <div class="success"></div>
+                    <span>Success</span>
+                </li>
+                <li>
+                    <div class="failed"></div>
+                    <span>Failed</span>
+                </li>
+                <li>
+                    <div class="cancelled"></div>
+                    <span>Cancelled</span>
+                </li>
+                <li>
+                    <div class="in-progress"></div>
+                    <span>In Progress</span>
+                </li>
+                <li>
+                    <div class="caught-error"></div>
+                    <span>Caught Error</span>
+                </li>
+            </ul></div><svg></svg></div>
     <div class="container col-md-6 align-center justify-content-center">
-        <form class="form" method="post" action="/approve/">
+        <form class="form" method="post" action="/vet_approve/">
             {% csrf_token %}
-            {{ state_form |crispy }}
-            <select id="cars" name="choice">
-              <option value="Continue">Continue</option>
-              <option value="Reassign">Reassign</option>
-            </select>
+            {{ ApprovalActionForm |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>
         </form>
     </div>

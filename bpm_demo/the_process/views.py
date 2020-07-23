@@ -8,6 +8,7 @@ from django.utils.timezone import now
 import uuid
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse
 import boto3
 
 state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
@@ -242,10 +243,37 @@ def post_enforcement(request):
 @never_cache
 def get_vetApproveAction(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    the_form = FindingsForm(initial={"stepStatus": stepStatus})
-    latest_status = """get_execution_history(execution_arn)"""
-    context = { 'stateId': id, 'finding_form': the_form, 'latest_status': latest_status}
-    return render(request, 'Findings.html', context)
+    the_form = ApprovalActionForm(initial={"stepStatus": stepStatus})
+    approvalAction = ApprovalAction.objects.filter(stepStatus=stepStatus)
+    if (approvalAction.exists()):
+        approvalAction = ApprovalAction.objects.get(stepStatus=stepStatus)
+        the_form = ApprovalActionForm(instance=risk_Assessment)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    # definition = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'ApprovalActionForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
+    return render(request, 'approveAction.html', context)
+
+@never_cache
+@require_POST
+def post_vetApproveAction(request):
+    approvalActionForm = ApprovalActionForm(request.POST)
+    if approvalActionForm.is_valid():
+        print('-------------approvalActionForm------------------')
+        stateId = request.POST.dict()['stepStatus']
+        stepStatus = StepStatus.objects.get(pk=stateId)
+        if (stepStatus.current_status == 'Vet/Approve Action'):
+            # resume stepfunction
+            resume_steps('done')
+            print('resumed Vet/Approve Action')
+            stepStatus = StepStatus.objects.get(pk =stateId)
+            stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+            stepStatus.save()
+            risk_AssessmentForm.save()
+        else:
+            return HttpResponse('<h1>Need to finish the remaining functions</h1><br><a href="/">click here to go back</a>')
+    return redirect('/vet_approve/'+stateId)
+
 #####################################################################
 
 

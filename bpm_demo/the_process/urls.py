@@ -16,6 +16,7 @@ urlpatterns = [
     path('enforcement/<int:id>/',views.get_enforcement,name='enforcement'),
     path('enforcement/',views.post_enforcement),
     path('vet_approve/<int:id>/',views.get_vetApproveAction,name='vet_approve'),
+    path('vet_approve/',views.post_vetApproveAction),
     # path('approve/',views.submit),
     # path('resume/',views.resume),
 ]
