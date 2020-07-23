@@ -209,23 +209,26 @@ def post_questionaire(request):
 @never_cache
 def get_enforcement(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    the_form = WarningsForm(initial={"stepStatus": stepStatus})
+    the_form_Warning = WarningsForm(initial={"stepStatus": stepStatus})
+    the_form_SWO = SWOForm(initial={"stepStatus": stepStatus})
+    SWO = SWO.objects.filter(stepStatus=stepStatus)
     warnings = Warnings.objects.filter(stepStatus=stepStatus)
-    if (warnings.exists()):
-        warnings = Warnings.objects.get(stepStatus=stepStatus)
-        the_form = Risk_AssessmentForm(instance=warnings)
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     # definition = get_execution_history(execution_arn)
-    context = { 'stateId': id, 'WarningsForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
+    if (warnings.exists()):
+        warnings = Warnings.objects.get(stepStatus=stepStatus)
+        the_form_Warning = Risk_AssessmentForm(instance=warnings)
+        context = { 'stateId': id, 'WarningsForm': the_form_Warning, 'status_diagram': status_diagram , 'definition': definition}
+    else if(SWO.exists()):
+        SWO = SWO.objects.get(stepStatus=stepStatus)
+         the_form_SWO = Risk_AssessmentForm(instance=warnings)
+        context = { 'stateId': id, 'SWOForm': the_form_SWO, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'Enforcement.html', context)
 
 @never_cache
 @require_POST
 def post_enforcement(request):
-    warningsForm = WarningsForm(request.POST)
-    if warningsForm.is_valid():
-        print('-------------Enforcement------------------')
         stateId = request.POST.dict()['stepStatus']
         # resume stepfunction
         resume_steps(str(stateId) + '-enforcement')
@@ -233,8 +236,28 @@ def post_enforcement(request):
         stepStatus = StepStatus.objects.get(pk =stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
         stepStatus.save()
-        warningsForm.save()
     return redirect('/enforcement/'+stateId)
+
+#####################################################################
+# Warning
+
+def post_warnings(request):
+    warningsForm = WarningsForm(request.POST)
+    if warningsForm.is_valid():
+        print('-------------Warnings------------------')
+        warningsForm.save()
+    post_enforcement(request)
+    
+
+#####################################################################
+# SWO
+
+def post_SWO(request):
+    SWOForm = SWOForm(request.POST)
+    if SWOForm.is_valid():
+        print('-------------Stop Watch Order------------------')
+        SWOForm.save()
+    post_enforcement(request)
 
 #####################################################################
 
