@@ -123,8 +123,9 @@ class SWO(models.Model):
 
 class ApprovalAction(models.Model):
     Decision_CHOICES = (
-        ('Support', 'Support'),
-        ('Reject', 'Reject')
+        ('Approve', 'Approve'),
+        ('Clarifications', 'Clarifications'),
+        ('Reassign', 'Reassign'),
     )
     stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     decision = models.CharField(max_length=255, choices=Decision_CHOICES)

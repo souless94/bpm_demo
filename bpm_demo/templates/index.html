@@ -8,6 +8,7 @@
    Here are your Tasks : 
 </div>
        <div class="container">
+           <div class="row justify-content-center">
             <table class="table table-light table-sm table-bordered table-hover">
                 <thead>
                     <tr>
@@ -18,6 +19,7 @@
                         <th scope="col">status</th>
                         <th scope="col">assignee</th>
                         <th scope="col">view task</th>
+                        <th scope="col">approve task</th>
                  </tr>
                 </thead>
                 <tbody>
@@ -30,6 +32,7 @@
                     <td scope="col">{{ task.current_status }}</td>
                     <td scope="col">{{ task.assignee }}</td>
                 <td> <a href="{% url 'the_process:update_inspection' task.id %}">Get Task</a></td>
+                <td> <a href="{% url 'the_process:approve' task.id %}">Approve</a></td>
                   </tr>
                     {% endfor %}
                 </tbody>
@@ -42,6 +45,7 @@
       
           </style>
         </div>
+    </div>
 <br>
 
 <a class="btn btn-primary" href="/createInspectionPage/">Create Inspection</a>

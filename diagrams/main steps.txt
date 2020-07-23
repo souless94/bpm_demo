@@ -66,9 +66,9 @@
           }
         }
       ],
-      "Next": "Update Inspection"
+      "Next": "Vet/Approve Action"
     },
-    "Update Inspection": {
+    "Vet/Approve Action": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Parameters": {
@@ -96,7 +96,7 @@
         {
           "Variable": "$.value",
           "StringEquals": "Clarifications",
-          "Next": "Update Inspection"
+          "Next": "Vet/Approve Action"
         }
       ],
       "Default": "Vetting/Approval"

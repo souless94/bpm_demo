@@ -11,15 +11,15 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 import boto3
 
-state_machine_arn = "arn:aws:states:ap-southeast-1:658793872383:stateMachine:Main_Steps"
-workflow_execution_role = "arn:aws:iam::658793872383:role/service-role/StepFunctions-Main_Steps-role-b6d9e573"
+state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
+workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-ce3aeb8f"
 sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
 # helper functions
 
 
-def resume_steps(id):
+def resume_steps(id,value="Approve"):
     # get token from dynamo db
     print(id)
     task_token = dynamodb.get_item(TableName='steps', Key={
@@ -30,7 +30,7 @@ def resume_steps(id):
     print("-----------------------------------------")
     response = sfn.send_task_success(
         taskToken=task_token,
-        output=json.dumps({'id': id})
+        output=json.dumps({'id': id,'value':value})
     )
     print("sent approval", response)
 
@@ -247,7 +247,7 @@ def get_vetApproveAction(request, id):
     approvalAction = ApprovalAction.objects.filter(stepStatus=stepStatus)
     if (approvalAction.exists()):
         approvalAction = ApprovalAction.objects.get(stepStatus=stepStatus)
-        the_form = ApprovalActionForm(instance=risk_Assessment)
+        the_form = ApprovalActionForm(instance=approvalAction)
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     # definition = get_execution_history(execution_arn)
@@ -261,18 +261,57 @@ def post_vetApproveAction(request):
     if approvalActionForm.is_valid():
         print('-------------approvalActionForm------------------')
         stateId = request.POST.dict()['stepStatus']
+        decision = request.POST.dict()['decision']
         stepStatus = StepStatus.objects.get(pk=stateId)
         if (stepStatus.current_status == 'Vet/Approve Action'):
             # resume stepfunction
-            resume_steps('done')
+            resume_steps('done',decision)
             print('resumed Vet/Approve Action')
             stepStatus = StepStatus.objects.get(pk =stateId)
             stepStatus.current_status = get_current_status(stepStatus.execution_arn)
             stepStatus.save()
-            risk_AssessmentForm.save()
+            approvalActionForm.save()
         else:
-            return HttpResponse('<h1>Need to finish the remaining functions</h1><br><a href="/">click here to go back</a>')
+            return HttpResponse('<h1>please to finish the remaining functions highlighted in blue in the diagram</h1><br><a href="/">click here to go back</a>')
     return redirect('/vet_approve/'+stateId)
+
+#####################################################################
+
+
+# approve officer
+@never_cache
+def get_Approve(request, id):
+    stepStatus = StepStatus.objects.get(pk=id)
+    submission = ApprovalAction.objects.filter(stepStatus=stepStatus)
+    if (submission.exists() == False):
+        return HttpResponse('<h1>please submit for approval </h1><br><a href="/">click here to go back</a>')
+    the_form = ApproveOfficerForm(initial={"stepStatus": stepStatus})
+    approveOfficer = ApproveOfficer.objects.filter(stepStatus=stepStatus)
+    if (approveOfficer.exists()):
+        approveOfficer = ApproveOfficer.objects.get(stepStatus=stepStatus)
+        the_form = ApproveOfficerForm(instance=approveOfficer)
+    status_diagram = get_execution_history(stepStatus.execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    # definition = get_execution_history(execution_arn)
+    context = { 'stateId': id, 'ApproveOfficerForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
+    return render(request, 'approveOfficer.html', context)
+
+@never_cache
+@require_POST
+def post_Approve(request):
+    approveOfficerForm = ApproveOfficerForm(request.POST)
+    stateId = request.POST.dict()['stepStatus']
+    if approveOfficerForm.is_valid():
+        print('-------------approvalActionForm------------------')
+        stepStatus = StepStatus.objects.get(pk=stateId)
+        # resume stepfunction
+        resume_steps(str(stepStatus.id))
+        print('resumed approve officer Action')
+        stepStatus = StepStatus.objects.get(pk =stateId)
+        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+        stepStatus.save()
+        approveOfficerForm.save()
+    return redirect('/approve/'+stateId)
 
 #####################################################################
 
@@ -284,3 +323,4 @@ def post_vetApproveAction(request):
 # 5) updateinspection -> questionaire -> send task success after getting task token via id+question
 # 6)updateinspection -> send task success with the choices approve/Reassign/Clarification to go to approval stage/ update inspection again
 # 7) approval stage -> approve /reject
+# 8) launch enforcements -> for each item in the enforcements 
