@@ -33,6 +33,7 @@
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
                 "Input.$": "$"
               },
+              "TimeoutSeconds": 20,
               "End": true
             }
           }
@@ -76,7 +77,7 @@
         },
         {
           "Variable": "$.value",
-          "StringEquals": "Approve",
+          "StringEquals": "Reassign",
           "Next": "Reassign"
         },
         {
@@ -89,7 +90,7 @@
     },
     "Reassign": {
       "Type": "Pass",
-      "Next": "Vetting/Approval Choices"
+      "Next": "Vet/Approve Action"
     },
     "Vetting/Approval": {
       "Type": "Task",

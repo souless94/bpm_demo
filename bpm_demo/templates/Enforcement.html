@@ -98,12 +98,20 @@
             </ul></div><svg></svg></div>
 <div class="alert alert-primary">WarningsForm</div>
     <div class="container col-md-6 align-center justify-content-center">
-        <form class="form" method="post" action="/enforcement/">
+        <form class="form" method="post" action="/warnings/">
             {% csrf_token %}
             {{ WarningsForm |crispy }}
             <button class="btn btn-primary" type="submit">Submit</button>
         </form>
     </div>
 
+<div class="alert alert-primary">SWOForm</div>
+    <div class="container col-md-6 align-center justify-content-center">
+        <form class="form" method="post" action="/swo/">
+            {% csrf_token %}
+            {{ SWOForm |crispy }}
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+    </div>
 {% endblock %}
 

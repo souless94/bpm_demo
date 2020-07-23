@@ -58,15 +58,11 @@ def get_current_status(execution_arn):
             result = list(map(lambda d: d.get('name'), result))
             return result[-1]
     else:
-        return reply
+        return 'Failed'
 
 def get_execution_history(execution_arn):
     response = sfn.get_execution_history(executionArn=execution_arn)
-    reply = parseFailureHistory(execution_arn)
-    if (reply == 'Execution did not fail'):
-        return json.dumps(response,cls=DjangoJSONEncoder)
-    else:
-        return reply
+    return json.dumps(response,cls=DjangoJSONEncoder)
 
 ################################ VIEWS #########################################
 # Create your views here.
@@ -122,7 +118,6 @@ def get_task(request, id):
 def updateInspection(request):
     update_InspectionForm = Update_InspectionForm(request.POST)
     if update_InspectionForm.is_valid():
-
         print('-------------inspection------------------')
         stateId = request.POST.dict()['stepStatus']
         # resume stepfunction
@@ -142,6 +137,8 @@ def updateInspection(request):
 @never_cache
 def get_finding(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.save()
     the_form = FindingsForm(initial={"stepStatus": stepStatus})
     findings = Findings.objects.filter(stepStatus=stepStatus)
     if (findings.exists()):
@@ -175,6 +172,8 @@ def post_finding(request):
 @never_cache
 def get_questionaire(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.save()
     the_form = Risk_AssessmentForm(initial={"stepStatus": stepStatus})
     risk_Assessment = Risk_Assessment.objects.filter(stepStatus=stepStatus)
     if (risk_Assessment.exists()):
@@ -209,55 +208,46 @@ def post_questionaire(request):
 @never_cache
 def get_enforcement(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.save()
     the_form_Warning = WarningsForm(initial={"stepStatus": stepStatus})
     the_form_SWO = SWOForm(initial={"stepStatus": stepStatus})
-    SWO = SWO.objects.filter(stepStatus=stepStatus)
+    swo = SWO.objects.filter(stepStatus=stepStatus)
     warnings = Warnings.objects.filter(stepStatus=stepStatus)
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     # definition = get_execution_history(execution_arn)
     if (warnings.exists()):
         warnings = Warnings.objects.get(stepStatus=stepStatus)
-        the_form_Warning = Risk_AssessmentForm(instance=warnings)
-        context = { 'stateId': id, 'WarningsForm': the_form_Warning, 'status_diagram': status_diagram , 'definition': definition}
-    else if(SWO.exists()):
-        SWO = SWO.objects.get(stepStatus=stepStatus)
-         the_form_SWO = Risk_AssessmentForm(instance=warnings)
-        context = { 'stateId': id, 'SWOForm': the_form_SWO, 'status_diagram': status_diagram , 'definition': definition}
+        the_form_Warning = WarningsForm(instance=warnings)
+    if (swo.exists()):
+        swo = SWO.objects.get(stepStatus=stepStatus)
+        the_form_SWO = SWOForm(instance=swo)
+    context = { 'stateId': id, 'SWOForm': the_form_SWO, 'WarningsForm': the_form_Warning, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'Enforcement.html', context)
 
+
+# Warning
 @never_cache
 @require_POST
-def post_enforcement(request):
-        stateId = request.POST.dict()['stepStatus']
-        # resume stepfunction
-        resume_steps(str(stateId) + '-enforcement')
-        print('resumed enforcement')
-        stepStatus = StepStatus.objects.get(pk =stateId)
-        stepStatus.current_status = get_current_status(stepStatus.execution_arn)
-        stepStatus.save()
-    return redirect('/enforcement/'+stateId)
-
-#####################################################################
-# Warning
-
 def post_warnings(request):
+    stateId = request.POST.dict()['stepStatus']
     warningsForm = WarningsForm(request.POST)
     if warningsForm.is_valid():
         print('-------------Warnings------------------')
         warningsForm.save()
-    post_enforcement(request)
+    return redirect('/enforcement/'+stateId)
     
-
-#####################################################################
 # SWO
-
+@never_cache
+@require_POST
 def post_SWO(request):
-    SWOForm = SWOForm(request.POST)
-    if SWOForm.is_valid():
+    stateId = request.POST.dict()['stepStatus']
+    swoForm = SWOForm(request.POST)
+    if swoForm.is_valid():
         print('-------------Stop Watch Order------------------')
-        SWOForm.save()
-    post_enforcement(request)
+        swoForm.save()
+    return redirect('/enforcement/'+stateId)
 
 #####################################################################
 
@@ -266,6 +256,8 @@ def post_SWO(request):
 @never_cache
 def get_vetApproveAction(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.save()
     the_form = ApprovalActionForm(initial={"stepStatus": stepStatus})
     approvalAction = ApprovalAction.objects.filter(stepStatus=stepStatus)
     if (approvalAction.exists()):
@@ -281,17 +273,24 @@ def get_vetApproveAction(request, id):
 @require_POST
 def post_vetApproveAction(request):
     approvalActionForm = ApprovalActionForm(request.POST)
+    
     if approvalActionForm.is_valid():
         print('-------------approvalActionForm------------------')
         stateId = request.POST.dict()['stepStatus']
         decision = request.POST.dict()['decision']
+        assignee = request.POST.dict()['assignee']
         stepStatus = StepStatus.objects.get(pk=stateId)
-        if (stepStatus.current_status == 'Vet/Approve Action'):
+        if (stepStatus.current_status == 'Vet/Approve Action' ):
             # resume stepfunction
+            approvalAction = ApprovalAction.objects.filter(stepStatus=stepStatus)
+            if (approvalAction.exists()):
+                approvalAction = ApprovalAction.objects.get(stepStatus=stepStatus)
+                approvalActionForm = ApprovalActionForm(request.POST,instance=approvalAction)
             resume_steps('done',decision)
             print('resumed Vet/Approve Action')
             stepStatus = StepStatus.objects.get(pk =stateId)
             stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+            stepStatus.assignee = assignee
             stepStatus.save()
             approvalActionForm.save()
         else:
@@ -328,7 +327,7 @@ def post_Approve(request):
         print('-------------approvalActionForm------------------')
         stepStatus = StepStatus.objects.get(pk=stateId)
         # resume stepfunction
-        resume_steps(str(stepStatus.id))
+        resume_steps('done')
         print('resumed approve officer Action')
         stepStatus = StepStatus.objects.get(pk =stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
@@ -338,6 +337,17 @@ def post_Approve(request):
 
 #####################################################################
 
+@never_cache
+@require_POST
+def post_enforcement(request):
+    stateId = request.POST.dict()['stepStatus']
+        # resume stepfunction
+    resume_steps('done-enforcement')
+    print('resumed enforcement')
+    stepStatus = StepStatus.objects.get(pk=stateId)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.save()
+    return redirect('/enforcement/'+stateId)
 
 # 1) create inspection -> step function triggered
 # 2) updateinspection -> Update_Inspection details -> send task success after getting task token via id+inspection_detail
