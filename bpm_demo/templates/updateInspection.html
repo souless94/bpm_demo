@@ -106,5 +106,15 @@
         </form>
     </div>
     
+<div class="alert alert-primary">Resume Failed State Here</div>
+<div class="container col-md-6 align-center justify-content-center">
+    <form class="form" method="post" action="/resume/">
+        {% csrf_token %}
+        <label>stepStatus Id</label>
+        <input type="text" name="stepStatus" value={{ stateId }} readonly>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+</div>
+
 {% endblock %}
 

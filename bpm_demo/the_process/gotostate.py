@@ -145,6 +145,7 @@ def attachGoToState(failedStateName, stateMachineArn):
     # Add StartAt
     stateMachine['StartAt'] = 'GoToState'
     # Create new state machine
+    print(stateMachine)
     try:
         response = client.create_state_machine(
             name=newName,

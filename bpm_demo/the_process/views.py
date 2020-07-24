@@ -10,6 +10,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 import boto3
+import time
 
 state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
 workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-ce3aeb8f"
@@ -32,19 +33,21 @@ def resume_steps(id,value="Approve"):
         taskToken=task_token,
         output=json.dumps({'id': id,'value':value})
     )
+    time.sleep(1.5)
     print("sent approval", response)
 
 
-def start_steps(id):
+def start_steps(id,state_machine_arn=state_machine_arn):
     response = sfn.start_execution(
         stateMachineArn=state_machine_arn,
-        input=json.dumps({'id': id})
+        input=json.dumps({'id': id,'resuming':True})
     )
     return response['executionArn']
 
 def get_current_status(execution_arn):
     response = sfn.get_execution_history(executionArn=execution_arn)
     reply = parseFailureHistory(execution_arn)
+    print(reply)
     if (reply == 'Execution did not fail'):
         result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
         check = list(map(lambda d: d.get('type'), result))
@@ -58,11 +61,29 @@ def get_current_status(execution_arn):
             result = list(map(lambda d: d.get('name'), result))
             return result[-1]
     else:
+        # resume_failed_steps(execution_arn,reply)
         return 'Failed'
 
 def get_execution_history(execution_arn):
     response = sfn.get_execution_history(executionArn=execution_arn)
     return json.dumps(response,cls=DjangoJSONEncoder)
+
+def resume_failed_steps(execution_arn,failed_step,id):
+    # first check if parallel
+    stateMachineArn = smArnFromExecutionArn(execution_arn)
+    newStateMachineArn = attachGoToState(failed_step,stateMachineArn)
+    response = sfn.get_execution_history(executionArn=execution_arn)
+    result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
+    result = list(filter(lambda d: d.get('type') == 'TaskStateExited', result))
+    result = list(filter(lambda d: json.loads(d.get('stateExitedEventDetails').get('output')).get('Status') == 'SUCCEEDED', result))
+    names = list(map(lambda d: d.get('stateExitedEventDetails').get('name'),result))
+    newExecutionArn = start_steps(id,newStateMachineArn)
+    return [newStateMachineArn,newExecutionArn]
+    # lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
+    # for name in names:
+    #     resume_steps(str(stateId) +lookup[name] )
+    
+
 
 ################################ VIEWS #########################################
 # Create your views here.
@@ -108,6 +129,7 @@ def get_task(request, id):
     stepStatus.save()
     update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
     the_form = Update_InspectionForm(instance=update_Inspection)
+    
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     context = { 'stateId': id, 'create_InspectionForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
@@ -146,6 +168,7 @@ def get_finding(request, id):
         the_form = FindingsForm(instance=findings)
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
+    
     # definition = get_execution_history(execution_arn)
     context = { 'stateId': id, 'finding_form': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'Findings.html', context)
@@ -164,6 +187,7 @@ def post_finding(request):
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
         stepStatus.save()
         findingForm.save()
+    
     return redirect('/finding/'+stateId)
 
 #####################################################################
@@ -348,6 +372,21 @@ def post_enforcement(request):
     stepStatus.current_status = get_current_status(stepStatus.execution_arn)
     stepStatus.save()
     return redirect('/enforcement/'+stateId)
+
+
+@never_cache
+@require_POST
+def post_resume(request):
+    stateId = request.POST.dict()['stepStatus']
+    stepStatus = StepStatus.objects.get(pk=stateId)
+    if stepStatus.current_status == 'Failed':
+        reply = parseFailureHistory(stepStatus.execution_arn)
+        updates = resume_failed_steps(stepStatus.execution_arn,tuple(reply)[0],stateId)
+        stepStatus.state_machine = updates[0]
+        stepStatus.execution_arn = updates[1]
+        stepStatus.save()
+    return redirect('/')
+
 
 # 1) create inspection -> step function triggered
 # 2) updateinspection -> Update_Inspection details -> send task success after getting task token via id+inspection_detail
