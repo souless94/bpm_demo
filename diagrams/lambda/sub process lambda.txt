@@ -6,7 +6,7 @@ def lambda_handler(event, context):
     print(event)
     task_token = event['TaskToken']
     inputs = event['Input']['id']
-    id = inputs + '-inspection_details'
+    id = inputs + '-findings'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('steps')
     response = table.put_item(

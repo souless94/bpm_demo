@@ -112,6 +112,7 @@
         {% csrf_token %}
         <label>stepStatus Id</label>
         <input type="text" name="stepStatus" value={{ stateId }} readonly>
+        <input type="text" name="states" value="findings" readonly>
         <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>

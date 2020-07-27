@@ -19,12 +19,24 @@ dynamodb = boto3.client('dynamodb')
 
 # helper functions
 
+def get_final_task_token(id):
+    task_token = dynamodb.get_item(TableName='steps', Key={
+            'id': {'S': id}})['Item']['final_task_token']['S']
+    return task_token
 
-def resume_steps(id,value="Approve"):
+def get_finding_arn(id):
+    arn = dynamodb.get_item(TableName='steps', Key={
+            'id': {'S': id}})['Item']['executionArn']['S']
+    return arn
+
+def resume_steps(id,value="Approve",mode="Normal"):
     # get token from dynamo db
     print(id)
     task_token = dynamodb.get_item(TableName='steps', Key={
         'id': {'S': id}})['Item']['task_token']['S']
+    if (mode == "Finding"):
+        print('finished the finding workflow')
+        task_token = get_final_task_token(id)
     print("-----------------------------------------")
     print('id', id)
     print(task_token)
@@ -33,7 +45,7 @@ def resume_steps(id,value="Approve"):
         taskToken=task_token,
         output=json.dumps({'id': id,'value':value})
     )
-    time.sleep(1.5)
+    time.sleep(1.4)
     print("sent approval", response)
 
 
@@ -71,13 +83,14 @@ def get_execution_history(execution_arn):
 def resume_failed_steps(execution_arn,failed_step,id):
     # first check if parallel
     stateMachineArn = smArnFromExecutionArn(execution_arn)
-    newStateMachineArn = attachGoToState(failed_step,stateMachineArn)
+    newStateMachineArn = attachGoToState(failed_step,stateMachineArn,id)
     response = sfn.get_execution_history(executionArn=execution_arn)
     result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
     result = list(filter(lambda d: d.get('type') == 'TaskStateExited', result))
     result = list(filter(lambda d: json.loads(d.get('stateExitedEventDetails').get('output')).get('Status') == 'SUCCEEDED', result))
     names = list(map(lambda d: d.get('stateExitedEventDetails').get('name'),result))
-    newExecutionArn = start_steps(id,newStateMachineArn)
+    newStateMachineArn = newStateMachineArn.get('stateMachineArn')
+    newExecutionArn = start_steps(str(id),state_machine_arn=newStateMachineArn)
     return [newStateMachineArn,newExecutionArn]
     # lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
     # for name in names:
@@ -143,7 +156,6 @@ def updateInspection(request):
         print('-------------inspection------------------')
         stateId = request.POST.dict()['stepStatus']
         # resume stepfunction
-        resume_steps(str(stateId) + '-inspection_details')
         print('resumed inspection_details')
         stepStatus = StepStatus.objects.get(pk=stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
@@ -151,6 +163,8 @@ def updateInspection(request):
         update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
         update_InspectionForm = Update_InspectionForm(request.POST,instance=update_Inspection)
         update_InspectionForm.save()
+        # resume stepfunction
+        resume_steps(str(stateId) + '-inspection_details')
     return redirect('/update_inspection/'+stateId)
 
 #####################################################################
@@ -159,6 +173,7 @@ def updateInspection(request):
 @never_cache
 def get_finding(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
+    execution_arn = get_finding_arn(str(id)+'-findings')
     stepStatus.current_status = get_current_status(stepStatus.execution_arn)
     stepStatus.save()
     the_form = FindingsForm(initial={"stepStatus": stepStatus})
@@ -166,10 +181,8 @@ def get_finding(request, id):
     if (findings.exists()):
         findings = Findings.objects.get(stepStatus=stepStatus)
         the_form = FindingsForm(instance=findings)
-    status_diagram = get_execution_history(stepStatus.execution_arn)
-    definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
-    
-    # definition = get_execution_history(execution_arn)
+    status_diagram = get_execution_history(execution_arn)
+    definition = sfn.describe_state_machine(stateMachineArn=smArnFromExecutionArn(execution_arn))['definition']
     context = { 'stateId': id, 'finding_form': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'Findings.html', context)
 
@@ -180,14 +193,14 @@ def post_finding(request):
     if findingForm.is_valid():
         print('-------------finding------------------')
         stateId = request.POST.dict()['stepStatus']
-        # resume stepfunction
-        resume_steps(str(stateId) + '-findings')
         print('resumed Findings')
         stepStatus = StepStatus.objects.get(pk =stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
         stepStatus.save()
         findingForm.save()
-    
+        # resume stepfunction
+        resume_steps(str(stateId) + '-findings')
+        resume_steps(str(stateId) + '-findings',mode="Finding")
     return redirect('/finding/'+stateId)
 
 #####################################################################
@@ -216,13 +229,13 @@ def post_questionaire(request):
     if risk_AssessmentForm.is_valid():
         print('-------------Questionaire------------------')
         stateId = request.POST.dict()['stepStatus']
-        # resume stepfunction
-        resume_steps(str(stateId) + '-question')
         print('resumed Questions')
         stepStatus = StepStatus.objects.get(pk =stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
         stepStatus.save()
         risk_AssessmentForm.save()
+        # resume stepfunction
+        resume_steps(str(stateId) + '-question')
     return redirect('/question/'+stateId)
 
 #####################################################################
@@ -378,13 +391,22 @@ def post_enforcement(request):
 @require_POST
 def post_resume(request):
     stateId = request.POST.dict()['stepStatus']
+    states = request.POST.dict()['states'].split(',')
     stepStatus = StepStatus.objects.get(pk=stateId)
     if stepStatus.current_status == 'Failed':
         reply = parseFailureHistory(stepStatus.execution_arn)
+        # create and start first
         updates = resume_failed_steps(stepStatus.execution_arn,tuple(reply)[0],stateId)
         stepStatus.state_machine = updates[0]
         stepStatus.execution_arn = updates[1]
-        stepStatus.save()
+        for state in states:
+            # resume those who is successful
+            print('-----------------TASK TOKEN--------------------')
+            time.sleep(1.4)
+            print('task Token',get_final_task_token(str(stateId)+ '-{}'.format(state)))
+            resume_steps(str(stateId)+ '-{}'.format(state),mode="Finding")
+            stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+            stepStatus.save()
     return redirect('/')
 
 

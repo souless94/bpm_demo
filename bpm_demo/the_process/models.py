@@ -81,6 +81,7 @@ class Findings(models.Model):
     Section_of_Group = models.CharField(
         max_length=20, choices=SECTIONA_CHOICES)
     Description_A = models.CharField(max_length=255)
+    finished = models.CharField(max_length=255,blank=True)
     objects = models.Manager()
 
 

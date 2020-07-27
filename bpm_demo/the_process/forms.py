@@ -24,6 +24,7 @@ class FindingsForm(ModelForm):
     class Meta:
         model = Findings
         fields = '__all__'
+        exclude= ['finished',]
 
 
 class Risk_AssessmentForm(ModelForm):

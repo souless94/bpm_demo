@@ -110,7 +110,7 @@ def parseFailureHistory(failedExecutionArn):
         currentEventId = currentEvent['previousEventId']
 
 
-def attachGoToState(failedStateName, stateMachineArn):
+def attachGoToState(failedStateName, stateMachineArn,id):
     '''
     Given a state machine arn and the name of a state in that state machine, create a new state machine 
     that starts at a new choice state called the 'GoToState'. The "GoToState" will branch to the named
@@ -129,7 +129,7 @@ def attachGoToState(failedStateName, stateMachineArn):
     roleArn = response['roleArn']
     stateMachine = json.loads(response['definition'])
     # Create a name for the new state machine
-    newName = response['name'] + '-with-GoToState'
+    newName = response['name'] + '-with-GoToState' +str(id)
     # Get the StartAt state for the original state machine, because we will point the 'GoToState' to this state
     originalStartAt = stateMachine['StartAt']
     '''
@@ -145,7 +145,6 @@ def attachGoToState(failedStateName, stateMachineArn):
     # Add StartAt
     stateMachine['StartAt'] = 'GoToState'
     # Create new state machine
-    print(stateMachine)
     try:
         response = client.create_state_machine(
             name=newName,
