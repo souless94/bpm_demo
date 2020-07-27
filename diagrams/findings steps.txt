@@ -1,0 +1,22 @@
+{
+  "StartAt": "Findings",
+  "States": {
+        "Findings": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-southeast-1:764277912183:function:steps",
+        "Payload": {
+          "Input.$": "$",
+          "TaskTokenSteps.$": "$$.Task.Token",
+          "ExecutionArn.$":"$$.Execution.Id"
+        }
+      },
+      "Next": "finish"
+    },
+    "finish": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+}

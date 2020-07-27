@@ -28,12 +28,15 @@
           "States": {
             "Findings": {
               "Type": "Task",
-              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Resource": "arn:aws:states:::states:startExecution.waitForTaskToken",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Findings",
-                "Input.$": "$"
+                "Input": {
+                  "Input.$": "$",
+                  "TaskToken.$": "$$.Task.Token"
+                }
               },
-              "TimeoutSeconds": 20,
+              "TimeoutSeconds": 60,
               "End": true
             }
           }
