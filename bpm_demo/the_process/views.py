@@ -97,12 +97,19 @@ def resume_failed_steps(execution_arn,failed_step,id):
     # for name in names:
     #     resume_steps(str(stateId) +lookup[name] )
 
-def delete_state_machine(stateMachineArn):
-    # check if go to state machine still exist
+def check_state_machine_exists(stateMachineArn):
+        # check if go to state machine still exist
     try:
         response = sfn.describe_state_machine(stateMachineArn)
+        return True
     except StateMachineDoesNotExist:
-        return
+        return False
+
+def delete_state_machine(stateMachineArn):
+    try:
+        exists = check_state_machine_exists(stateMachineArn)
+        if exists:
+            response = sfn.describe_state_machine(stateMachineArn)
     except:
         print('The provided Amazon Resource Name (ARN) is invalid.')
     if (response['stateMachineArn'] == stateMachineArn):
