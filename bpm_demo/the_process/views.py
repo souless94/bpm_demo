@@ -83,19 +83,31 @@ def get_execution_history(execution_arn):
 def resume_failed_steps(execution_arn,failed_step,id):
     # first check if parallel
     stateMachineArn = smArnFromExecutionArn(execution_arn)
+    delete_state_machine(stateMachineArn)
     newStateMachineArn = attachGoToState(failed_step,stateMachineArn,id)
     response = sfn.get_execution_history(executionArn=execution_arn)
     result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
     result = list(filter(lambda d: d.get('type') == 'TaskStateExited', result))
     result = list(filter(lambda d: json.loads(d.get('stateExitedEventDetails').get('output')).get('Status') == 'SUCCEEDED', result))
     names = list(map(lambda d: d.get('stateExitedEventDetails').get('name'),result))
-    newStateMachineArn = newStateMachineArn.get('stateMachineArn')
+    global newStateMachineArn = newStateMachineArn.get('stateMachineArn')
     newExecutionArn = start_steps(str(id),state_machine_arn=newStateMachineArn)
     return [newStateMachineArn,newExecutionArn]
     # lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
     # for name in names:
     #     resume_steps(str(stateId) +lookup[name] )
-    
+
+def delete_state_machine(stateMachineArn):
+    # check if go to state machine still exist
+    try:
+        response = sfn.describe_state_machine(stateMachineArn)
+    except StateMachineDoesNotExist:
+        return
+    except:
+        print('The provided Amazon Resource Name (ARN) is invalid.')
+    if (response['stateMachineArn'] == stateMachineArn):
+        sfn.delete_state_machine(stateMachineArn)    
+
 
 
 ################################ VIEWS #########################################
