@@ -21,6 +21,7 @@ urlpatterns = [
     path('approve/<int:id>/',views.get_Approve,name='approve'),
     path('approve/',views.post_Approve),
     path('enforcement/',views.post_enforcement),
+    path('answer/',views.post_answer_question),
     path('resume/',views.post_resume)
     # path('approve/',views.submit),
     # path('resume/',views.resume),

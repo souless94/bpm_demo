@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from django.forms import modelformset_factory
 from .models import *
 
 
@@ -27,11 +28,11 @@ class FindingsForm(ModelForm):
         exclude= ['finished',]
 
 
-class Risk_AssessmentForm(ModelForm):
+class QuestionaireForm(ModelForm):
     class Meta:
-        model = Risk_Assessment
+        model = Questionaire
         fields = '__all__'
-
+        exclude =['question']
 
 class WarningsForm(ModelForm):
     class Meta:

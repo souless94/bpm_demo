@@ -3,10 +3,10 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-
-<div class="alert alert-primary">
-   Here are your Tasks : 
-</div>
+<br>
+<div class="empty-alert empty-alert--information">
+    <div class="empty-alert__title">Here are your tasks
+        </div></div>
        <div class="container">
            <div class="row justify-content-center">
             <table class="table table-light table-sm table-bordered table-hover">
@@ -48,7 +48,9 @@
     </div>
 <br>
 
-<a class="btn btn-primary" href="/createInspectionPage/">Create Inspection</a>
+<a  href="/createInspectionPage/"><button id="empty_bottom_action_buttons" class="empty-btn empty-btn--primary">
+    Create Inspection <i class="empty-icon empty-icon-chevron-right empty-icon-1-em"></i>
+</button></a>
 
 
 {% endblock %}

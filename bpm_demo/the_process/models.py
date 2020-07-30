@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
+from simple_history.models import HistoricalRecords
 import uuid
+
 # Create your models here.
 
 
@@ -46,6 +48,7 @@ class StepStatus(models.Model):
     execution_arn = models.CharField(max_length=255)
     current_status = models.CharField(max_length=255,default='None')
     assignee = models.CharField(max_length=255,default='Not Assigned')
+    history = HistoricalRecords()
     objects = models.Manager()
 
 
@@ -84,8 +87,15 @@ class Findings(models.Model):
     finished = models.CharField(max_length=255,blank=True)
     objects = models.Manager()
 
+class QuestionAdder(models.Model):
+    category = models.CharField(max_length=255, default="Update Inspection")
+    question_text = models.CharField(max_length=200,blank=True,unique=True)
+    objects = models.Manager()
 
-class Risk_Assessment(models.Model):
+class Question(models.Model):
+    stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
+    questionAdder = models.ForeignKey(QuestionAdder,on_delete=models.CASCADE,max_length=200,blank=True)
+    question_text =models.CharField(max_length=255)
     RMI_CHOICES = (
         ('Basic', 'Basic'),
         ('Good', 'Good'),
@@ -93,10 +103,13 @@ class Risk_Assessment(models.Model):
         ('Not Assessed', 'Not Assessed'),
         ('Unsatisfactory', 'Unsatisfactory')
     )
+    answer = models.CharField(max_length=20, blank=True, choices=RMI_CHOICES)
+    objects = models.Manager()
+
+class Questionaire(models.Model):
     stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
-    Response = models.CharField(max_length=20, choices=RMI_CHOICES)
-    Question = models.CharField(max_length=255)
-    Description = models.CharField(max_length=255)
+    question = models.ManyToManyField(Question,blank=True)
+    title = models.CharField(max_length=255)
     objects = models.Manager()
 
 
