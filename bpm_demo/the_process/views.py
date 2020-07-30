@@ -7,7 +7,7 @@ from django.views.decorators.cache import never_cache
 from django.utils.timezone import now
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory , RadioSelect
 import boto3
 import time
 import uuid
@@ -137,7 +137,7 @@ def delete_state_machine(stateMachineArn):
 
 ################################ VIEWS #########################################
 # Create your views here.
-AnswerFormSet = modelformset_factory(Question,fields='__all__',exclude=['stepStatus','questionAdder'],extra=0)
+AnswerFormSet = modelformset_factory(model=Question,form=QuestionForm,extra=0)
 
 @never_cache
 def index(request):

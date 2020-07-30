@@ -73,7 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bpm_demo.wsgi.application'
-
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

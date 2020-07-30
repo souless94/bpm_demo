@@ -1,7 +1,20 @@
-from django.forms import ModelForm
-from django.forms import modelformset_factory
+from django.forms import ModelForm, modelformset_factory,ChoiceField, RadioSelect
 from .models import *
+from django.utils.safestring import mark_safe
 
+class HorizontalRadioRenderer(RadioSelect):
+  def render(self):
+    return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class QuestionForm(ModelForm):
+    class Meta:
+        model = Question
+        fields = '__all__'
+        exclude = ['stepStatus','questionAdder']
+    answer = ChoiceField(choices=Question.RMI_CHOICES,
+                 initial=0,
+                 widget=RadioSelect(),
+                                 )
 
 class StepStatusForm(ModelForm):
     class Meta:
