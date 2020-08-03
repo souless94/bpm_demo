@@ -90,7 +90,7 @@ def resume_failed_steps(execution_arn,failed_step,id):
     result = list(filter(lambda d: d.get('type') == 'TaskStateExited', result))
     result = list(filter(lambda d: json.loads(d.get('stateExitedEventDetails').get('output')).get('Status') == 'SUCCEEDED', result))
     names = list(map(lambda d: d.get('stateExitedEventDetails').get('name'),result))
-    global newStateMachineArn = newStateMachineArn.get('stateMachineArn')
+    newStateMachineArn = newStateMachineArn.get('stateMachineArn')
     newExecutionArn = start_steps(str(id),state_machine_arn=newStateMachineArn)
     return [newStateMachineArn,newExecutionArn]
     # lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
