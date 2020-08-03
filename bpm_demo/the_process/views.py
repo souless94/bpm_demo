@@ -5,12 +5,13 @@ from .gotostate import *
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from django.utils.timezone import now
-import uuid
-import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
+from django.forms import modelformset_factory , RadioSelect
 import boto3
 import time
+import uuid
+import json
 
 state_machine_arn = "arn:aws:states:ap-southeast-1:764277912183:stateMachine:MyStateMachine"
 workflow_execution_role = "arn:aws:iam::764277912183:role/service-role/StepFunctions-MyStateMachine-role-ce3aeb8f"
@@ -24,7 +25,7 @@ def get_final_task_token(id):
             'id': {'S': id}})['Item']['final_task_token']['S']
     return task_token
 
-def get_finding_arn(id):
+def get_sub_arn(id):
     arn = dynamodb.get_item(TableName='steps', Key={
             'id': {'S': id}})['Item']['executionArn']['S']
     return arn
@@ -34,19 +35,38 @@ def resume_steps(id,value="Approve",mode="Normal"):
     print(id)
     task_token = dynamodb.get_item(TableName='steps', Key={
         'id': {'S': id}})['Item']['task_token']['S']
-    if (mode == "Finding"):
-        print('finished the finding workflow')
-        task_token = get_final_task_token(id)
+    
     print("-----------------------------------------")
     print('id', id)
     print(task_token)
     print("-----------------------------------------")
-    response = sfn.send_task_success(
-        taskToken=task_token,
-        output=json.dumps({'id': id,'value':value})
-    )
+    if (mode != "Normal"):
+        try:
+            response = sfn.send_task_success(
+            taskToken=task_token,
+            output=json.dumps({'id': id,'value':value})
+        )
+            return 'sent'
+        except :
+            print('task already sent')
+            
+    try:
+        response = sfn.send_task_success(
+            taskToken=task_token,
+            output=json.dumps({'id': id,'value':value})
+        )
+    except :
+        print('task already sent')
+    try:
+        final_task_token = get_final_task_token(id)
+        response = sfn.send_task_success(
+            taskToken=final_task_token,
+            output=json.dumps({'id': id,'value':value})
+        )
+    except :
+        print('task already sent')
     time.sleep(1.4)
-    print("sent approval", response)
+    print("sent approval")
 
 
 def start_steps(id,state_machine_arn=state_machine_arn):
@@ -115,11 +135,9 @@ def delete_state_machine(stateMachineArn):
     if (response['stateMachineArn'] == stateMachineArn):
         sfn.delete_state_machine(stateMachineArn)    
 
-
-
 ################################ VIEWS #########################################
 # Create your views here.
-
+AnswerFormSet = modelformset_factory(model=Question,form=QuestionForm,extra=0)
 
 @never_cache
 def index(request):
@@ -192,7 +210,7 @@ def updateInspection(request):
 @never_cache
 def get_finding(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    execution_arn = get_finding_arn(str(id)+'-findings')
+    execution_arn = get_sub_arn(str(id)+'-findings')
     stepStatus.current_status = get_current_status(stepStatus.execution_arn)
     stepStatus.save()
     the_form = FindingsForm(initial={"stepStatus": stepStatus})
@@ -219,7 +237,6 @@ def post_finding(request):
         findingForm.save()
         # resume stepfunction
         resume_steps(str(stateId) + '-findings')
-        resume_steps(str(stateId) + '-findings',mode="Finding")
     return redirect('/finding/'+stateId)
 
 #####################################################################
@@ -230,29 +247,59 @@ def get_questionaire(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
     stepStatus.current_status = get_current_status(stepStatus.execution_arn)
     stepStatus.save()
-    the_form = Risk_AssessmentForm(initial={"stepStatus": stepStatus})
-    risk_Assessment = Risk_Assessment.objects.filter(stepStatus=stepStatus)
-    if (risk_Assessment.exists()):
-        risk_Assessment = Risk_Assessment.objects.get(stepStatus=stepStatus)
-        the_form = Risk_AssessmentForm(instance=risk_Assessment)
+    the_form = QuestionaireForm(initial={"stepStatus": stepStatus})
+    questionaire = Questionaire.objects.filter(stepStatus=stepStatus)
+    if (questionaire.exists()):
+        questionaire = Questionaire.objects.get(stepStatus=stepStatus)
+        the_form = QuestionaireForm(instance=questionaire)
+    else:
+        # create a questionaire
+        questions = QuestionAdder.objects.filter(category="Update Inspection")
+        for question in questions:
+            # create the question object
+            the_question = Question(stepStatus=stepStatus,questionAdder=question,question_text=question.question_text)
+            the_question.save()
+        questions = Question.objects.filter(stepStatus=stepStatus)
+        questionaire = Questionaire(stepStatus=stepStatus)
+        questionaire.save()
+        questionaire.question.set(questions)
+        questionaire.save()
+    questions = Question.objects.filter(stepStatus=stepStatus)
     status_diagram = get_execution_history(stepStatus.execution_arn)
     definition = sfn.describe_state_machine(stateMachineArn=stepStatus.state_machine)['definition']
     # definition = get_execution_history(execution_arn)
-    context = { 'stateId': id, 'RiskAssessmentForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
+    
+    answerFormSet = AnswerFormSet(queryset=Question.objects.filter(stepStatus=stepStatus))
+    for form in answerFormSet:
+        print(form.as_table())
+    context = { 'stateId': id, 'answerForms':answerFormSet,'RiskAssessmentForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'riskAssessment.html', context)
 
 @never_cache
 @require_POST
+def post_answer_question(request):
+    data = request.POST.dict()
+    stateId = request.POST.dict()['stateId']
+    answerForm= AnswerFormSet(request.POST)
+    # answerForm = AnswerForm(request.POST)
+    answerForm.save()
+    return redirect('/question/'+stateId)
+
+
+@never_cache
+@require_POST
 def post_questionaire(request):
-    risk_AssessmentForm = Risk_AssessmentForm(request.POST)
-    if risk_AssessmentForm.is_valid():
+    questionaireForm = QuestionaireForm(request.POST)
+    if questionaireForm.is_valid():
         print('-------------Questionaire------------------')
         stateId = request.POST.dict()['stepStatus']
         print('resumed Questions')
         stepStatus = StepStatus.objects.get(pk =stateId)
         stepStatus.current_status = get_current_status(stepStatus.execution_arn)
         stepStatus.save()
-        risk_AssessmentForm.save()
+        questionaire = Questionaire.objects.get(stepStatus=stepStatus)
+        questionaireForm = QuestionaireForm(request.POST,instance=questionaire)
+        questionaireForm.save()
         # resume stepfunction
         resume_steps(str(stateId) + '-question')
     return redirect('/question/'+stateId)
@@ -342,7 +389,7 @@ def post_vetApproveAction(request):
             if (approvalAction.exists()):
                 approvalAction = ApprovalAction.objects.get(stepStatus=stepStatus)
                 approvalActionForm = ApprovalActionForm(request.POST,instance=approvalAction)
-            resume_steps('done',decision)
+            resume_steps('done',decision,"vet/approve")
             print('resumed Vet/Approve Action')
             stepStatus = StepStatus.objects.get(pk =stateId)
             stepStatus.current_status = get_current_status(stepStatus.execution_arn)

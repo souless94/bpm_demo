@@ -1,12 +1,12 @@
 {% extends '_layout/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
 {% block content %}
 <script type="text/javascript" src="{% static 'load_graph.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'load_graph_styles.css' %}">
 
-<a class="btn btn-primary" href="/">Home</a>
-<hr>
+<div class="empty-container">
 <div class="container col-md-8 centered d-flex">
     <table class="table table-light table-sm table-bordered table-hover col-md-12">
         <thead>
@@ -100,8 +100,35 @@
     <div class="container col-md-6 align-center justify-content-center">
         <form class="form" method="post" action="/warnings/">
             {% csrf_token %}
-            {{ WarningsForm |crispy }}
-            <button class="btn btn-primary" type="submit">Submit</button>
+            {% for field in WarningsForm %}
+            <div class="empty">
+                {%if field.field.widget.input_type == 'select' %}
+                {{ field.label_tag }}
+                {{ field|add_class:"chosen-select empty-combo-material empty-none" }}
+                {% else %}
+                {{ field.label_tag }}
+                {{ field|add_class:"empty-none" }}
+                {% endif %}
+            </div>
+            
+            {% endfor %}
+            
+            <div class="empty-t-container empty-container-no-indent">
+                <div class="empty-page-footer-actions">
+                    <div class="empty-eight empty-page-footer-actions-left">
+                        <a class="empty-page-footer-link-action" href="#"><i class="empty-icon empty-icon-chevron-left empty-icon-1-em"></i>Back</a>
+                        <button id="empty_bottom_action_buttons" class="empty-btn empty-btn--primary">
+                                Submit <i class="empty-icon empty-icon-chevron-right empty-icon-1-em"></i>
+                            </button>
+                        <button class="empty-btn empty-btn--light">
+                                <i class="empty-icon empty-icon-floppy-disk empty-icon-1-em"></i> Save as Draft
+                            </button>
+                    </div>
+                    <div class="empty-four empty-page-footer-actions-right">
+                        <a class="empty-page-footer-link-action" href="#"><i class="empty-icon empty-icon-cross empty-icon-1-em"></i>Exit eService </a>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 
@@ -109,9 +136,37 @@
     <div class="container col-md-6 align-center justify-content-center">
         <form class="form" method="post" action="/swo/">
             {% csrf_token %}
-            {{ SWOForm |crispy }}
-            <button class="btn btn-primary" type="submit">Submit</button>
+            {% for field in SWOForm %}
+            <div class="empty">
+                {%if field.field.widget.input_type == 'select' %}
+                {{ field.label_tag }}
+                {{ field|add_class:"chosen-select empty-combo-material empty-none" }}
+                {% else %}
+                {{ field.label_tag }}
+                {{ field|add_class:"empty-none" }}
+                {% endif %}
+            </div>
+            
+            {% endfor %}
+            
+            <div class="empty-t-container empty-container-no-indent">
+                <div class="empty-page-footer-actions">
+                    <div class="empty-eight empty-page-footer-actions-left">
+                        <a class="empty-page-footer-link-action" href="#"><i class="empty-icon empty-icon-chevron-left empty-icon-1-em"></i>Back</a>
+                        <button id="empty_bottom_action_buttons" class="empty-btn empty-btn--primary">
+                                Submit <i class="empty-icon empty-icon-chevron-right empty-icon-1-em"></i>
+                            </button>
+                        <button class="empty-btn empty-btn--light">
+                                <i class="empty-icon empty-icon-floppy-disk empty-icon-1-em"></i> Save as Draft
+                            </button>
+                    </div>
+                    <div class="empty-four empty-page-footer-actions-right">
+                        <a class="empty-page-footer-link-action" href="#"><i class="empty-icon empty-icon-cross empty-icon-1-em"></i>Exit eService </a>
+                    </div>
+                </div>
+            </div>
         </form>
-    </div>
+
+</div>
 {% endblock %}
 

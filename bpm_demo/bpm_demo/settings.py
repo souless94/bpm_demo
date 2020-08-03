@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'the_process',
+    'simple_history',
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'bpm_demo.urls'
@@ -70,7 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bpm_demo.wsgi.application'
-
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
