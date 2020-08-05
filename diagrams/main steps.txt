@@ -14,10 +14,13 @@
           "States": {
             "Update Inspection Details": {
               "Type": "Task",
-              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Resource": "arn:aws:states:::states:startExecution.waitForTaskToken",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:UpdateInspectionDetails",
-                "Input.$": "$"
+                "Input": {
+                  "Input.$": "$",
+                  "TaskToken.$": "$$.Task.Token"
+                }
               },
               "End": true
             }
@@ -36,7 +39,6 @@
                   "TaskToken.$": "$$.Task.Token"
                 }
               },
-              "TimeoutSeconds": 60,
               "End": true
             }
           }
@@ -46,10 +48,13 @@
           "States": {
             "Questionaire": {
               "Type": "Task",
-              "Resource": "arn:aws:states:::states:startExecution.sync:2",
+              "Resource": "arn:aws:states:::states:startExecution.waitForTaskToken",
               "Parameters": {
                 "StateMachineArn": "arn:aws:states:ap-southeast-1:764277912183:stateMachine:Questionaire",
-                "Input.$": "$"
+                "Input": {
+                  "Input.$": "$",
+                  "TaskToken.$": "$$.Task.Token"
+                }
               },
               "End": true
             }

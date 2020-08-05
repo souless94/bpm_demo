@@ -19,6 +19,8 @@ sfn = boto3.client('stepfunctions')
 dynamodb = boto3.client('dynamodb')
 
 # helper functions
+def get_parallel_tasks_succeeded(id):
+    pass
 
 def get_final_task_token(id):
     task_token = dynamodb.get_item(TableName='steps', Key={
@@ -35,7 +37,6 @@ def resume_steps(id,value="Approve",mode="Normal"):
     print(id)
     task_token = dynamodb.get_item(TableName='steps', Key={
         'id': {'S': id}})['Item']['task_token']['S']
-    
     print("-----------------------------------------")
     print('id', id)
     print(task_token)
@@ -55,6 +56,7 @@ def resume_steps(id,value="Approve",mode="Normal"):
             taskToken=task_token,
             output=json.dumps({'id': id,'value':value})
         )
+
     except :
         print('task already sent')
     try:
@@ -63,6 +65,11 @@ def resume_steps(id,value="Approve",mode="Normal"):
             taskToken=final_task_token,
             output=json.dumps({'id': id,'value':value})
         )
+        # put item in dynamodb that it is completed
+        original = dynamodb.get_item(TableName='steps', Key={
+            'id': {'S': id}})['Item']
+        original['Succeeded']={'S':'Yes'}
+        dynamodb.put_item(TableName='steps',Item=original)
     except :
         print('task already sent')
     time.sleep(1.4)
@@ -76,12 +83,11 @@ def start_steps(id,state_machine_arn=state_machine_arn):
     )
     return response['executionArn']
 
-def get_current_status(execution_arn):
+def get_current_status(execution_arn,id):
     response = sfn.get_execution_history(executionArn=execution_arn)
     reply = parseFailureHistory(execution_arn)
-    print(reply)
+    result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
     if (reply == 'Execution did not fail'):
-        result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
         check = list(map(lambda d: d.get('type'), result))
         if 'ParallelStateEntered' in check and 'ParallelStateSucceeded' not in check :
             result = list(filter(lambda d: d.get('type') == 'ParallelStateEntered', result))
@@ -93,7 +99,13 @@ def get_current_status(execution_arn):
             result = list(map(lambda d: d.get('name'), result))
             return result[-1]
     else:
-        # resume_failed_steps(execution_arn,reply)
+        # edited here 4-august-2020
+        # newStateMachineArn, newExecutionArn = resume_failed_steps(execution_arn=execution_arn,failed_step=tuple(reply)[0],id=id)
+        lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
+        for name in names:
+            # resume_steps(str(stateId) +lookup[name] )
+            print(lookup[name])
+        
         return 'Failed'
 
 def get_execution_history(execution_arn):
@@ -103,7 +115,7 @@ def get_execution_history(execution_arn):
 def resume_failed_steps(execution_arn,failed_step,id):
     # first check if parallel
     stateMachineArn = smArnFromExecutionArn(execution_arn)
-    delete_state_machine(stateMachineArn)
+    # delete_state_machine(stateMachineArn)
     newStateMachineArn = attachGoToState(failed_step,stateMachineArn,id)
     response = sfn.get_execution_history(executionArn=execution_arn)
     result = json.loads(json.dumps(response,cls=DjangoJSONEncoder)).get('events')
@@ -112,10 +124,8 @@ def resume_failed_steps(execution_arn,failed_step,id):
     names = list(map(lambda d: d.get('stateExitedEventDetails').get('name'),result))
     newStateMachineArn = newStateMachineArn.get('stateMachineArn')
     newExecutionArn = start_steps(str(id),state_machine_arn=newStateMachineArn)
-    return [newStateMachineArn,newExecutionArn]
-    # lookup = {'Update Inspection Details':'-inspection_details','Findings':'-findings','Questionaire':'-question'}
-    # for name in names:
-    #     resume_steps(str(stateId) +lookup[name] )
+    return newStateMachineArn,newExecutionArn
+    # 
 
 def check_state_machine_exists(stateMachineArn):
         # check if go to state machine still exist
@@ -174,7 +184,7 @@ def CreateInspection(request):
 @never_cache
 def get_task(request, id):
     stepStatus = StepStatus.objects.get(pk=id)
-    stepStatus.current_status = get_current_status(stepStatus.execution_arn)
+    stepStatus.current_status = get_current_status(stepStatus.execution_arn,id)
     stepStatus.assignee = 'OSHD1'
     stepStatus.save()
     update_Inspection = Update_Inspection.objects.get(stepStatus=stepStatus)
@@ -250,6 +260,7 @@ def get_questionaire(request, id):
     the_form = QuestionaireForm(initial={"stepStatus": stepStatus})
     questionaire = Questionaire.objects.filter(stepStatus=stepStatus)
     if (questionaire.exists()):
+        print('loading existing form --------------')
         questionaire = Questionaire.objects.get(stepStatus=stepStatus)
         the_form = QuestionaireForm(instance=questionaire)
     else:
@@ -270,8 +281,6 @@ def get_questionaire(request, id):
     # definition = get_execution_history(execution_arn)
     
     answerFormSet = AnswerFormSet(queryset=Question.objects.filter(stepStatus=stepStatus))
-    for form in answerFormSet:
-        print(form.as_table())
     context = { 'stateId': id, 'answerForms':answerFormSet,'RiskAssessmentForm': the_form, 'status_diagram': status_diagram , 'definition': definition}
     return render(request, 'riskAssessment.html', context)
 
