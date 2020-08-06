@@ -69,6 +69,7 @@ class Update_Inspection(models.Model):
     Arrival_Time = models.DateTimeField(default=now)
     Workplace_No = models.CharField(max_length=100)
     objects = models.Manager()
+    history = HistoricalRecords()
 
 
 class Findings(models.Model):
@@ -91,6 +92,7 @@ class QuestionAdder(models.Model):
     category = models.CharField(max_length=255, default="Update Inspection")
     question_text = models.CharField(max_length=200,blank=True,unique=True)
     objects = models.Manager()
+    history = HistoricalRecords()
 
 class Question(models.Model):
     stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
@@ -125,6 +127,7 @@ class Warnings(models.Model):
     Act = models.CharField(max_length=255)
     Law = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
+    status = models.CharField(max_length=255,default="InActive")
     objects = models.Manager()
 
 
@@ -132,6 +135,7 @@ class SWO(models.Model):
     stepStatus = models.ForeignKey(StepStatus, on_delete=models.CASCADE)
     justification = models.CharField(max_length=255)
     offenderDetails = models.CharField(max_length=255)
+    status = models.CharField(max_length=255,default="InActive")
     objects = models.Manager()
 
 

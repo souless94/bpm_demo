@@ -2,11 +2,11 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from . import models
 
-class Update_InspectionAdmin(admin.ModelAdmin):
+class Update_InspectionAdmin(SimpleHistoryAdmin):
     list_display = ('stepStatus',)
     search_fields = ['stepStatus__id',]
 
-class FindingsAdmin(admin.ModelAdmin):
+class FindingsAdmin(SimpleHistoryAdmin):
     list_display = ('stepStatus',)
     search_fields = ['stepStatus__id',]
 
@@ -14,7 +14,7 @@ class WarningsAdmin(admin.ModelAdmin):
     list_display = ('stepStatus',)
     search_fields = ['stepStatus__id',]
 
-class QuestionaireAdmin(admin.ModelAdmin):
+class QuestionaireAdmin(SimpleHistoryAdmin):
     list_display = ('stepStatus',)
     search_fields = ['stepStatus__id',]
 
